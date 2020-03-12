@@ -45,6 +45,7 @@ vector<partition_id> hotspot_calculator::excpetion_check()
             }
         }
     }
+    //maybe we should clear global_count periodic
     return suspected_partition;
 }
 
