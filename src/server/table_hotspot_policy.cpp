@@ -53,7 +53,7 @@ void send_rpc(suspected_partition){
         return;
     }
     result = send_to_relica();
-    show result in some way;
+    derror(result);
 }
 
 void hotspot_calculator::start_alg() {
