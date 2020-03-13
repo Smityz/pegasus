@@ -34,19 +34,20 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
-vector<partition_id> hotspot_calculator::excpetion_check()
+// Read/write separation
+vector<partition_id> hotspot_calculator::excpetion_read_check()
 {
-    vector<partition_id> suspected_partition;
-    for (int i=0;i<_points.size();i++){
-        if (_points[i]>THRESHOLD_1){
-            global_count[i]++;
-            if (global_count[i]>THRESHOLD_2){
-                suspected_partition.push(i);
+    vector<partition_id> suspected_read_partition;
+    for (partition:suspected_read_partition){
+        if (_read_points[i]>THRESHOLD_1){
+            global_read_count[i]++;
+            if (global_read_count[i]>THRESHOLD_2){
+                suspected_read_partition.push(i);
             }
         }
     }
     //maybe we should clear global_count periodic
-    return suspected_partition;
+    return suspected_read_partition;
 }
 
 void send_rpc(suspected_partition){
@@ -61,7 +62,8 @@ void hotspot_calculator::start_alg() {
     _policy->analysis(_app_data, _points);
     //we can also send_rpc manully
     if (auto_detect_on){
-        this->send_rpc(excpetion_check());
+        this->send_read_check_rpc(excpetion_read_check());
+        this->send_write_check_rpc(excpetion_write_check())
     }
 }
 

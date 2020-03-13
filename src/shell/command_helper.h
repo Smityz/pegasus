@@ -514,9 +514,11 @@ struct row_data
 {
     double get_total_qps() const
     {
-        return get_qps + multi_get_qps + scan_qps + put_qps + multi_put_qps + remove_qps +
+        return get_qps + multi_get_qps + scan_qps + put_qps + ll + remove_qps +
                multi_remove_qps + incr_qps + check_and_set_qps + check_and_mutate_qps;
     }
+
+
 
     double get_total_cu() const { return recent_read_cu + recent_write_cu; }
 
