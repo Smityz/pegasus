@@ -50,8 +50,8 @@ vector<partition_id> hotspot_calculator::excpetion_read_check()
     return suspected_read_partition;
 }
 
-void send_rpc(suspected_partition){
-    if (suspected_partition in watch_list){
+void send_read_check_rpc(suspected_partition){
+    if (suspected_partition in read_watch_list){
         return;
     }
     result = send_to_relica();
