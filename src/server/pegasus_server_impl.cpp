@@ -559,6 +559,84 @@ void pegasus_server_impl::gc_checkpoints(bool force_reserve_one)
            max_d);
 }
 
+
+class hotkey_collector{
+public:
+    void capture_read_data(data) {
+        if (read_grained_level == stop) return ;
+        if (read_grained_level == coarse) coarse_read_count[hash(data)]++;
+        // (hash(data) in read_watch_list) must be thread safe!
+        if (read_grained_level == fine && (hash(data) in read_watch_list) && mtx.try_lock())  fine_read_count[data]++;
+    }
+    void capture_write_data(data) {
+        if (write_grained_level == stop) return ;
+        if (write_grained_level == coarse) coarse_write_count[hash(data)]++;
+        if (write_grained_level == fine && (hash(data) in write_watch_list))  fine_write_count[data]++;
+    }
+
+    static void register_service(){
+        if (receive_RPC == read){
+            read_grained_level = coarse;
+        };
+        if (receive_RPC == write){
+            write_grained_level = coarse;
+        };
+    }
+
+    // Timing task
+    // all the opreations in `analyse_read_data` must be thread safe!
+    void analyse_read_data(){
+        if (read_grained_level == coarse){
+            if (analyse_read_coarse_level(coarse_read_count,coarse_result)){
+                derror("Find read_hotkey in coarse_level");
+                read_watch_list.add(coarse_result);
+                memset(coarse_read_count);
+                read_grained_level = fine;
+            }else{
+                derror("Can't Find read_hotkey in coarse_level");
+            }
+        } else if (read_grained_level == fine){
+            if (analyse_read_fine_level(read_watch_list,fine_result)){
+                derror("Find read_hotkey in fine_level");
+                send_back(fine_result);
+            }else{
+                derror("Can't find read_hotkey in fine_level");
+            }
+        }
+    }
+
+    // Timing task
+    // all the opreations in `analyse_read_data` are single threaded task
+    void analyse_write_data(){
+        if (write_grained_level == coarse){
+            if (analyse_write_coarse_level(coarse_write_count,result)){
+                derror("Find write_hotkey in coarse_level");
+                write_watch_list.add(result);
+                memset(coarse_write_count);
+                write_grained_level = fine;
+            }else{
+                derror("Can't Find write_hotkey in coarse_level");
+            }
+        } else if (read_grained_level == fine){
+            if (analyse_write_fine_level(write_watch_list,fine_result)){
+                derror("Find write_hotkey in fine_level");
+                send_back(fine_result);
+            }else{
+                derror("Can't find write_hotkey in fine_level");
+            }
+        }
+    }
+
+    ~hotkey_collector();
+
+private:
+    atomic_int read_grained_level;
+    int write_grained_level;
+    atomic_uint coarse_read_count[];
+    int coarse_write_count[];
+    map <string,int> fine_read_count,fine_write_count;
+};
+
 int pegasus_server_impl::on_batched_write_requests(int64_t decree,
                                                    uint64_t timestamp,
                                                    dsn::message_ex **requests,
