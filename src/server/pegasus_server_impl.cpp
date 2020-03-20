@@ -6,19 +6,19 @@
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
-#include <rocksdb/convenience.h>
-#include <rocksdb/utilities/checkpoint.h>
-#include <rocksdb/filter_policy.h>
-#include <dsn/utility/chrono_literals.h>
-#include <dsn/utility/utils.h>
-#include <dsn/utility/filesystem.h>
-#include <dsn/utility/string_conv.h>
 #include <dsn/dist/fmt_logging.h>
 #include <dsn/dist/replication/replication.codes.h>
+#include <dsn/utility/chrono_literals.h>
+#include <dsn/utility/filesystem.h>
+#include <dsn/utility/string_conv.h>
+#include <dsn/utility/utils.h>
+#include <rocksdb/convenience.h>
+#include <rocksdb/filter_policy.h>
+#include <rocksdb/utilities/checkpoint.h>
 
 #include "base/pegasus_key_schema.h"
-#include "base/pegasus_value_schema.h"
 #include "base/pegasus_utils.h"
+#include "base/pegasus_value_schema.h"
 #include "capacity_unit_calculator.h"
 #include "hashkey_transform.h"
 #include "pegasus_event_listener.h"
@@ -559,82 +559,139 @@ void pegasus_server_impl::gc_checkpoints(bool force_reserve_one)
            max_d);
 }
 
-
-class hotkey_collector{
+class hotkey_collector
+{
 public:
-    void capture_read_data(data) {
-        if (read_grained_level == stop) return ;
-        if (read_grained_level == coarse) coarse_read_count[hash(data)]++;
+    void init()
+    {
+        collector_status = coarse;
+        memset(coarse_count, 0, sizeof(coarse_count));
+        timestramp = now.time();
+    }
+
+    void clear()
+    {
+        collector_status = stop;
+        coarse_count.clear();
+        fine_count.clear();
+        timestramp = 0;
+    }
+
+    void capture_data(data)
+    {
+        if (collector_status == stop)
+            return;
+        if (collector_status == coarse)
+            coarse_count[hash(data)]++;
         // (hash(data) in read_watch_list) must be thread safe!
-        if (read_grained_level == fine && (hash(data) in read_watch_list) && mtx.try_lock())  fine_read_count[data]++;
-    }
-    void capture_write_data(data) {
-        if (write_grained_level == stop) return ;
-        if (write_grained_level == coarse) coarse_write_count[hash(data)]++;
-        if (write_grained_level == fine && (hash(data) in write_watch_list))  fine_write_count[data]++;
+        if (collector_status == fine && (hash(data) in watch_list))
+            fine_read_count[data]++;
     }
 
-    static void register_service(){
-        if (receive_RPC == read){
-            read_grained_level = coarse;
-        };
-        if (receive_RPC == write){
-            write_grained_level = coarse;
-        };
-    }
-
-    // Timing task
+    // Periodic tasks
     // all the opreations in `analyse_read_data` must be thread safe!
-    void analyse_read_data(){
-        if (read_grained_level == coarse){
-            if (analyse_read_coarse_level(coarse_read_count,coarse_result)){
+    void analyse_read_data()
+    {
+        if (read_grained_level == coarse) {
+            if (analyse_read_coarse_level(coarse_read_count, coarse_result)) {
                 derror("Find read_hotkey in coarse_level");
                 read_watch_list.add(coarse_result);
                 memset(coarse_read_count);
-                read_grained_level = fine;
-            }else{
+                read_grained_level.store(fine, memory_order_release);
+            } else {
                 derror("Can't Find read_hotkey in coarse_level");
             }
-        } else if (read_grained_level == fine){
-            if (analyse_read_fine_level(read_watch_list,fine_result)){
+        } else if (read_grained_level == fine) {
+            if (analyse_read_fine_level(read_watch_list, fine_result)) {
                 derror("Find read_hotkey in fine_level");
                 send_back(fine_result);
-            }else{
+            } else {
                 derror("Can't find read_hotkey in fine_level");
             }
         }
     }
 
-    // Timing task
-    // all the opreations in `analyse_read_data` are single threaded task
-    void analyse_write_data(){
-        if (write_grained_level == coarse){
-            if (analyse_write_coarse_level(coarse_write_count,result)){
-                derror("Find write_hotkey in coarse_level");
-                write_watch_list.add(result);
-                memset(coarse_write_count);
-                write_grained_level = fine;
-            }else{
-                derror("Can't Find write_hotkey in coarse_level");
-            }
-        } else if (read_grained_level == fine){
-            if (analyse_write_fine_level(write_watch_list,fine_result)){
-                derror("Find write_hotkey in fine_level");
-                send_back(fine_result);
-            }else{
-                derror("Can't find write_hotkey in fine_level");
+    string app_paritition_info;
+    string analyse_result;
+
+private:
+    atomic_int collector_status;
+    atomic_uint coarse_count[];
+    map<string, int> fine_count;
+    time timestramp;
+};
+
+// All the operation must be thread safe here
+// Because data flow shunt is multi-thread
+class hotkey_collector_manager
+{
+public:
+    void receive_RPC(RPC rpc)
+    {
+        for (collector_struct in hotkey_collector_list) {
+            if (hotkey_collector_is_exist) {
+                reply(rpc, rpc_is_exist);
+                return;
+            } else {
+                int seat = find_seat_for_new_partititon;
+                if (seat != -1) {
+                    hotkey_collector_list[seat].status = 1;
+                    hotkey_collector_list[seat].rpc = move(rpc);
+                    hotkey_collector_list[seat].init(rpc_info);
+                } else {
+                    reply(rpc, has_no_seats);
+                    return;
+                }
             }
         }
     }
 
-    ~hotkey_collector();
+    // Periodic tasks
+    // Analyse data && clear finished collector
+    void collector_patrol()
+    {
+        for (collector_struct in hotkey_collector_list {
+            if (collector_struct.status == 1) {
+                collector_struct.collector.analyse_read_data();
+            }
+            if (collector_struct.get_collector_status == finish) {
+                collector_struct.status.store(0, memory_order_acquire);
+                reply(collector_struct.rpc, result);
+                collector_struct.clear();
+            }
+            if (collector_struct.collector_is_time_out) {
+                collector_struct.status.store(0, memory_order_acquire);
+                reply(collector_struct.rpc, time_out);
+                collector_struct.clear();
+            }
+        }
+    }
+
+    void read_requset_wrapper(const ::dsn::blob &read_request)
+    {
+        for (collector in hotkey_collector_list) {
+            if (collector.status == 1 && read_request.partition == collector.info) {
+                collector.capture_data(read_request.key);
+            }
+        }
+    }
+
+    void write_requset_wrapper(dsn::message_ex write_request)
+    {
+        for (collector in hotkey_collector_list) {
+            if (collector.status == 1 && read_request.partition == collector.info) {
+                collector.capture_data(read_request.key);
+            }
+        }
+    }
 
 private:
-    atomic_int read_grained_level;
-    int write_grained_level;
-    atomic_uint coarse_read_count[];
-    int coarse_write_count[];
-    map <string,int> fine_read_count,fine_write_count;
+    struct collector_struct
+    {
+        RPC rpc;
+        atomic_bool status;
+        hotkey_collector collector;
+    } hotkey_collector_list[MAX_COLLECTOR_NUM];
 };
 
 int pegasus_server_impl::on_batched_write_requests(int64_t decree,
