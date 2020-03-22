@@ -38,30 +38,29 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
 vector<partition_id> hotspot_calculator::excpetion_read_check()
 {
     vector<partition_id> suspected_read_partition;
-    for (partition:suspected_read_partition){
-        if (_read_points[i]>THRESHOLD_1){
+    for (partition : suspected_read_partition) {
+        if (_read_points[i] > THRESHOLD_1) {
             global_read_count[i]++;
-            if (global_read_count[i]>THRESHOLD_2){
+            if (global_read_count[i] > THRESHOLD_2) {
                 suspected_read_partition.push(i);
             }
         }
     }
-    //maybe we should clear global_count periodic
+    // maybe we should clear global_count periodic
     return suspected_read_partition;
 }
 
-void send_read_check_rpc(suspected_partition){
-    if (suspected_partition in read_watch_list){
-        return;
-    }
+void send_read_check_rpc(suspected_partition)
+{
     result = send_to_relica();
     derror(result);
 }
 
-void hotspot_calculator::start_alg() {
+void hotspot_calculator::start_alg()
+{
     _policy->analysis(_app_data, _points);
-    //we can also send_rpc manully
-    if (auto_detect_on){
+    // we can also send_rpc manully
+    if (auto_detect_on) {
         this->send_read_check_rpc(excpetion_read_check());
         this->send_write_check_rpc(excpetion_write_check())
     }
