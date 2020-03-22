@@ -583,40 +583,40 @@ public:
             return;
         if (collector_status == coarse)
             coarse_count[hash(data)]++;
-        // (hash(data) in read_watch_list) must be thread safe!
+        // (hash(data) in watch_list) must be thread safe!
         if (collector_status == fine && (hash(data) in watch_list))
-            fine_read_count[data]++;
+            fine_count[data]++;
     }
 
     // Periodic tasks
-    // all the opreations in `analyse_read_data` must be thread safe!
-    void analyse_read_data()
+    // all the opreations in `analyse_data` must be thread safe!
+    void analyse_data()
     {
-        if (read_grained_level == coarse) {
-            if (analyse_read_coarse_level(coarse_read_count, coarse_result)) {
-                derror("Find read_hotkey in coarse_level");
-                read_watch_list.add(coarse_result);
-                memset(coarse_read_count);
-                read_grained_level.store(fine, memory_order_release);
+        if (grained_level == coarse) {
+            if (analyse_coarse_level(coarse_count, coarse_result)) {
+                derror("Find hotkey in coarse_level");
+                watch_list.add(coarse_result);
+                memset(coarse_count);
+                grained_level.store(fine, memory_order_release);
             } else {
-                derror("Can't Find read_hotkey in coarse_level");
+                derror("Can't Find hotkey in coarse_level");
             }
-        } else if (read_grained_level == fine) {
-            if (analyse_read_fine_level(read_watch_list, fine_result)) {
-                derror("Find read_hotkey in fine_level");
-                send_back(fine_result);
+        } else if (grained_level == fine) {
+            if (analyse_fine_level(watch_list, fine_result)) {
+                derror("Find hotkey in fine_level");
+                grained_level.store(finish, memory_order_release);
             } else {
-                derror("Can't find read_hotkey in fine_level");
+                derror("Can't find hotkey in fine_level");
             }
         }
     }
 
-    string app_paritition_info;
-    string analyse_result;
-
 private:
-    atomic_int collector_status;
     atomic_uint coarse_count[];
+    // collector_status:stop,coarse,fine,finish
+    atomic_int collector_status;
+    string app_paritition_info;
+    string fine_result;
     map<string, int> fine_count;
     time timestramp;
 };
@@ -635,8 +635,6 @@ public:
             } else {
                 int seat = find_seat_for_new_partititon;
                 if (seat != -1) {
-                    hotkey_collector_list[seat].status = 1;
-                    hotkey_collector_list[seat].rpc = move(rpc);
                     hotkey_collector_list[seat].init(rpc_info);
                 } else {
                     reply(rpc, has_no_seats);
@@ -651,10 +649,10 @@ public:
     void collector_patrol()
     {
         for (collector_struct in hotkey_collector_list {
-            if (collector_struct.status == 1) {
-                collector_struct.collector.analyse_read_data();
+            if (collector_struct.collector_status == corase) {
+                collector_struct.collector.analyse_data();
             }
-            if (collector_struct.get_collector_status == finish) {
+            if (collector_struct.collector_status == finish) {
                 collector_struct.status.store(0, memory_order_acquire);
                 reply(collector_struct.rpc, result);
                 collector_struct.clear();
