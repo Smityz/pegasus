@@ -668,7 +668,8 @@ public:
     void read_requset_wrapper(const ::dsn::blob &read_request)
     {
         for (collector in hotkey_collector_list) {
-            if (collector.status == 1 && read_request.partition == collector.info) {
+            if ((collector.collector_status == corase || collector.collector_status == fine) &&
+                read_request.partition == collector.info) {
                 collector.capture_data(read_request.key);
             }
         }
@@ -677,8 +678,9 @@ public:
     void write_requset_wrapper(dsn::message_ex write_request)
     {
         for (collector in hotkey_collector_list) {
-            if (collector.status == 1 && read_request.partition == collector.info) {
-                collector.capture_data(read_request.key);
+            if ((collector.collector_status == corase || collector.collector_status == fine) &&
+                write_request.partition == collector.info) {
+                collector.capture_data(rwrite_request.key);
             }
         }
     }
@@ -687,7 +689,6 @@ private:
     struct collector_struct
     {
         RPC rpc;
-        atomic_bool status;
         hotkey_collector collector;
     } hotkey_collector_list[MAX_COLLECTOR_NUM];
 };
