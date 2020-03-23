@@ -4,34 +4,34 @@
 
 #pragma once
 
-#include <getopt.h>
-#include <thread>
-#include <iomanip>
-#include <fstream>
-#include <queue>
 #include <boost/algorithm/string.hpp>
-#include <rocksdb/db.h>
-#include <rocksdb/sst_dump_tool.h>
-#include <rocksdb/env.h>
-#include <rocksdb/statistics.h>
 #include <dsn/cpp/json_helper.h>
 #include <dsn/dist/cli/cli.client.h>
-#include <dsn/dist/replication/replication_ddl_client.h>
 #include <dsn/dist/replication/mutation_log_tool.h>
+#include <dsn/dist/replication/replication_ddl_client.h>
 #include <dsn/perf_counter/perf_counter_utils.h>
 #include <dsn/utility/string_view.h>
 #include <dsn/utility/time_utils.h>
+#include <fstream>
+#include <getopt.h>
+#include <iomanip>
+#include <queue>
+#include <rocksdb/db.h>
+#include <rocksdb/env.h>
+#include <rocksdb/sst_dump_tool.h>
+#include <rocksdb/statistics.h>
+#include <thread>
 
+#include <geo/lib/geo_client.h>
+#include <pegasus/error.h>
+#include <pegasus/git_commit.h>
+#include <pegasus/version.h>
 #include <rrdb/rrdb.code.definition.h>
 #include <rrdb/rrdb_types.h>
-#include <pegasus/version.h>
-#include <pegasus/git_commit.h>
-#include <pegasus/error.h>
-#include <geo/lib/geo_client.h>
 
 #include "base/pegasus_key_schema.h"
-#include "base/pegasus_value_schema.h"
 #include "base/pegasus_utils.h"
+#include "base/pegasus_value_schema.h"
 
 #include "command_executor.h"
 #include "command_utils.h"
@@ -546,6 +546,13 @@ struct row_data
     }
 
     double get_total_cu() const { return recent_read_cu + recent_write_cu; }
+
+    double get_total_read_qps() const { return get_qps + multi_get_qps + scan_qps; }
+
+    double get_total_write_qps() const
+    {
+        return put_qps + multi_put_qps + incr_qps + check_and_set_qps + check_and_mutate_qps;
+    }
 
     std::string row_name;
     int32_t app_id = 0;
