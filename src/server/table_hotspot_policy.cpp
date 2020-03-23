@@ -39,9 +39,9 @@ vector<partition_id> hotspot_calculator::excpetion_read_check()
 {
     vector<partition_id> suspected_read_partition;
     for (partition : suspected_read_partition) {
-        if (_read_points[i] > THRESHOLD_1) {
+        if (_read_points[i] > THRESHOLD_OF_HOTSPOT_PARTITION_VALUE) {
             global_read_count[i]++;
-            if (global_read_count[i] > THRESHOLD_2) {
+            if (global_read_count[i] > THRESHOLD_OF_SEND_RPC_TO_DETECT_HOTKEY) {
                 suspected_read_partition.push(i);
             }
         }
