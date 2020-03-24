@@ -4,22 +4,22 @@
 
 #pragma once
 
-#include <dsn/tool-api/task_tracker.h>
 #include <dsn/dist/replication.h>
 #include <dsn/dist/replication/replication_other_types.h>
 #include <dsn/perf_counter/perf_counter_wrapper.h>
+#include <dsn/tool-api/task_tracker.h>
 
-#include <stdlib.h>
-#include <signal.h>
-#include <unistd.h>
-#include <evhttp.h>
+#include <event2/bufferevent.h>
 #include <event2/event.h>
 #include <event2/http.h>
-#include <event2/bufferevent.h>
+#include <evhttp.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "../shell/commands.h"
-#include "table_stats.h"
 #include "table_hotspot_policy.h"
+#include "table_stats.h"
 
 namespace pegasus {
 namespace server {
@@ -135,6 +135,9 @@ private:
     uint32_t _storage_size_retry_wait_seconds;
     uint32_t _storage_size_retry_max_count;
     std::string _hotspot_detect_algorithm;
+    std::bool _hotkey_auto_detect;
+    uint32_t THRESHOLD_OF_HOTSPOT_PARTITION_VALUE;
+    uint32_t THRESHOLD_OF_SEND_RPC_TO_DETECT_HOTKEY;
     ::dsn::task_ptr _storage_size_stat_timer_task;
     ::dsn::utils::ex_lock_nr _capacity_unit_update_info_lock;
     // mapping 'node address' --> 'last updated timestamp'

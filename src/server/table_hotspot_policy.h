@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "hotspot_partition_data.h"
+#include "info_collector.h"
 #include <dsn/perf_counter/perf_counter.h>
 
 namespace pegasus {
@@ -36,22 +37,32 @@ class hotspot_calculator
 public:
     hotspot_calculator(const std::string &app_name,
                        const int partition_num,
-                       std::unique_ptr<hotspot_policy> policy)
-        : _app_name(app_name), _points(partition_num), _policy(std::move(policy))
+                       std::unique_ptr<hotspot_policy> policy,
+                       const bool detect_hotkey)
+        : _app_name(app_name),
+          _points(partition_num),
+          _policy(std::move(policy)),
+          detect_hotkey,
+          _auto_detect_hotkey(detect_hotkey)
     {
         init_perf_counter(partition_num);
+        if (_auto_detect_hotkey) {
+            _over_threshold_times(partition_num);
+        }
     }
     void aggregate(const std::vector<row_data> &partitions);
     void start_alg();
     void init_perf_counter(const int perf_counter_count);
+    void notice_replica(const std::string &app_name, const int partition_num);
 
 private:
     const std::string _app_name;
     std::vector<hotpartition_counter> _points;
+    std::vector<int> _over_threshold_times;
     std::queue<std::vector<hotspot_partition_data>> _app_data;
     std::unique_ptr<hotspot_policy> _policy;
+    bool _auto_detect_hotkey;
     static const int kMaxQueueSize = 100;
-
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };
 } // namespace server
