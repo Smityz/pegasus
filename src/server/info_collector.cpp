@@ -94,7 +94,7 @@ info_collector::info_collector()
     THRESHOLD_OF_SEND_RPC_TO_DETECT_HOTKEY =
         (uint32_t)dsn_config_get_value_uint64("pegasus.collector",
                                               "threshold_of_send_rpc_to_detect_hotkey",
-                                              4,
+                                              1,
                                               "threshold of send rpc to detect hotkey");
 
     // _storage_size_retry_wait_seconds is in range of [1, 60]

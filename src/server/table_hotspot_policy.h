@@ -47,6 +47,16 @@ public:
         init_perf_counter(partition_num);
         if (_auto_detect_hotkey) {
             _over_threshold_times.resize(partition_num);
+            THRESHOLD_OF_HOTSPOT_PARTITION_VALUE =
+                (uint32_t)dsn_config_get_value_uint64("pegasus.collector",
+                                                      "threshold_of_hotspot_partition_value",
+                                                      4,
+                                                      "threshold of hotspot partition value");
+            THRESHOLD_OF_SEND_RPC_TO_DETECT_HOTKEY =
+                (uint32_t)dsn_config_get_value_uint64("pegasus.collector",
+                                                      "threshold_of_send_rpc_to_detect_hotkey",
+                                                      1,
+                                                      "threshold of send rpc to detect hotkey");
         }
     }
     void aggregate(const std::vector<row_data> &partitions);
