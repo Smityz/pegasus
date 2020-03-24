@@ -46,7 +46,7 @@ public:
     {
         init_perf_counter(partition_num);
         if (_auto_detect_hotkey) {
-            _over_threshold_times(partition_num);
+            _over_threshold_times.resize(partition_num);
         }
     }
     void aggregate(const std::vector<row_data> &partitions);
