@@ -42,7 +42,6 @@ public:
         : _app_name(app_name),
           _points(partition_num),
           _policy(std::move(policy)),
-          detect_hotkey,
           _auto_detect_hotkey(detect_hotkey)
     {
         init_perf_counter(partition_num);

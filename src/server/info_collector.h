@@ -135,7 +135,7 @@ private:
     uint32_t _storage_size_retry_wait_seconds;
     uint32_t _storage_size_retry_max_count;
     std::string _hotspot_detect_algorithm;
-    std::bool _hotkey_auto_detect;
+    bool _hotkey_auto_detect;
     uint32_t THRESHOLD_OF_HOTSPOT_PARTITION_VALUE;
     uint32_t THRESHOLD_OF_SEND_RPC_TO_DETECT_HOTKEY;
     ::dsn::task_ptr _storage_size_stat_timer_task;
