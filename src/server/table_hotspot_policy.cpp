@@ -3,7 +3,6 @@
 // can be found in the LICENSE file in the root directory of this source tree.
 
 #include "table_hotspot_policy.h"
-#include "info_collector.h"
 #include <dsn/dist/fmt_logging.h>
 
 namespace pegasus {
@@ -52,12 +51,10 @@ void hotspot_calculator::start_alg()
     _policy->analysis(_app_data, _points);
     if (_auto_detect_hotkey) {
         for (const auto &item : _points) {
-            if (item.read_hotpartition_counter->get_value() >
-                THRESHOLD_OF_HOTSPOT_PARTITION_VALUE) {
+            if (item.read_hotpartition_counter->get_value() > kHotPartitionT) {
                 int index = distance(_points.begin(), item);
                 _over_threshold_times[index]++;
-                if (_over_threshold_times[distance(_points.begin(), item)] >
-                    THRESHOLD_OF_SEND_RPC_TO_DETECT_HOTKEY) {
+                if (_over_threshold_times[distance(_points.begin(), item)] > kHotRpcT) {
                     notice_replica(this->_app_name, index);
                     _over_threshold_times[index] = 0;
                 }
