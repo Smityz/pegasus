@@ -70,8 +70,8 @@ private:
     std::queue<std::vector<hotspot_partition_data>> _app_data;
     std::unique_ptr<hotspot_policy> _policy;
     bool _hotkey_auto_detect;
-    static const int kMaxQueueSize = 100;
-    static int kHotPartitionT, kHotRpcT;
+    const int kMaxQueueSize = 100;
+    int kHotPartitionT, kHotRpcT;
     dsn::task_tracker _tracker;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };
