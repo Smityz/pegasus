@@ -47,7 +47,7 @@ void hotspot_calculator::notice_replica(const std::string &app_name, const int p
 void hotspot_calculator::start_alg()
 {
     _policy->analysis(_app_data, _points);
-    if (_auto_detect_hotkey) {
+    if (_hotkey_auto_detect) {
         for (const auto &item : _points) {
             if (item.read_hotpartition_counter->get_value() > kHotPartitionT) {
                 int index = distance(_points.begin(), item);
