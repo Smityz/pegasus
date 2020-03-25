@@ -50,7 +50,7 @@ void hotspot_calculator::start_alg()
     if (_hotkey_auto_detect) {
         for (const auto &item : _points) {
             if (item.read_hotpartition_counter->get_value() > kHotPartitionT) {
-                int index = distance(_points.begin(), item);
+                int index = std::distance(_points.begin(), item);
                 _over_threshold_times[index]++;
                 if (_over_threshold_times[distance(_points.begin(), item)] > kHotRpcT) {
                     notice_replica(this->_app_name, index);
