@@ -36,15 +36,16 @@ class hotspot_calculator
 public:
     hotspot_calculator(const std::string &app_name,
                        const int partition_num,
-                       std::unique_ptr<hotspot_policy> policy,
-                       const bool detect_hotkey)
-        : _app_name(app_name),
-          _points(partition_num),
-          _policy(std::move(policy)),
-          _auto_detect_hotkey(detect_hotkey)
+                       std::unique_ptr<hotspot_policy> policy)
+        : _app_name(app_name), _points(partition_num), _policy(std::move(policy))
     {
         init_perf_counter(partition_num);
-        if (_auto_detect_hotkey) {
+        _hotkey_auto_detect =
+            dsn_config_get_value_bool("pegasus.collector",
+                                      "hotkey_auto_detect",
+                                      true,
+                                      "auto detect hot key in the hot paritition");
+        if (_hotkey_auto_detect) {
             _over_threshold_times.resize(partition_num);
             kHotPartitionT = (uint32_t)dsn_config_get_value_uint64(
                 "pegasus.collector", "kHotPartitionT", 4, "threshold of hotspot partition value");
@@ -63,7 +64,7 @@ private:
     std::vector<int> _over_threshold_times;
     std::queue<std::vector<hotspot_partition_data>> _app_data;
     std::unique_ptr<hotspot_policy> _policy;
-    bool _auto_detect_hotkey;
+    bool _hotkey_auto_detect;
     static const int kMaxQueueSize = 100;
     static int kHotPartitionT, kHotRpcT;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);

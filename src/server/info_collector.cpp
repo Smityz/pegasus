@@ -82,10 +82,6 @@ info_collector::info_collector()
                                                             "hotspot_detect_algorithm",
                                                             "hotspot_algo_qps_variance",
                                                             "hotspot_detect_algorithm");
-    _hotkey_auto_detect = dsn_config_get_value_bool("pegasus.collector",
-                                                    "hotkey_auto_detect",
-                                                    true,
-                                                    "auto detect hot key in the hot paritition");
 
     // _storage_size_retry_wait_seconds is in range of [1, 60]
     _storage_size_retry_wait_seconds =
@@ -308,7 +304,7 @@ hotspot_calculator *info_collector::get_hotspot_calculator(const std::string &ap
         return nullptr;
     }
     hotspot_calculator *calculator =
-        new hotspot_calculator(app_name, partition_num, std::move(policy), _hotkey_auto_detect);
+        new hotspot_calculator(app_name, partition_num, std::move(policy));
     _hotspot_calculator_store[app_name] = calculator;
     return calculator;
 }
