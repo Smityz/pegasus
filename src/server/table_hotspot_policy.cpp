@@ -48,11 +48,10 @@ void hotspot_calculator::start_alg()
 {
     _policy->analysis(_app_data, _points);
     if (_hotkey_auto_detect) {
-        for (const auto &item : _points) {
-            if (item.read_hotpartition_counter->get_value() > kHotPartitionT) {
-                int index = std::distance(_points.begin(), item);
-                _over_threshold_times[index]++;
-                if (_over_threshold_times[distance(_points.begin(), item)] > kHotRpcT) {
+        for (int i = 0; i < _points.size(); i++) {
+            if (_points[i].read_hotpartition_counter->get_value() > kHotPartitionT) {
+                _over_threshold_times[i]++;
+                if (_over_threshold_times[i] > kHotRpcT) {
                     notice_replica(this->_app_name, index);
                     _over_threshold_times[index] = 0;
                 }
