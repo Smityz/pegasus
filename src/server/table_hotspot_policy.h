@@ -56,7 +56,7 @@ public:
     void aggregate(const std::vector<row_data> &partitions);
     void start_alg();
     void init_perf_counter(const int perf_counter_count);
-    void notice_replica(const std::string &app_name, const int partition_num);
+    static void notice_replica(const std::string &app_name, const int partition_num);
 
 private:
     const std::string _app_name;
