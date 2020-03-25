@@ -53,7 +53,7 @@ void hotspot_calculator::start_alg()
                 _over_threshold_times[i]++;
                 if (_over_threshold_times[i] > kHotRpcT) {
                     notice_replica(this->_app_name, i);
-                    _over_threshold_times[index] = 0;
+                    _over_threshold_times[i] = 0;
                 }
             }
         }
