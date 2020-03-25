@@ -33,11 +33,16 @@ public:
 // hotspot_calculator is used to find the hotspot in Pegasus
 class hotspot_calculator
 {
+private:
 public:
     hotspot_calculator(const std::string &app_name,
                        const int partition_num,
                        std::unique_ptr<hotspot_policy> policy)
-        : _app_name(app_name), _points(partition_num), _policy(std::move(policy))
+        : _app_name(app_name),
+          _points(partition_num),
+          _policy(std::move(policy)),
+          kHotPartitionT(0),
+          kHotRpcT(0)
     {
         init_perf_counter(partition_num);
         _hotkey_auto_detect =
