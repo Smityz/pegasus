@@ -4,22 +4,22 @@
 
 #pragma once
 
+#include <dsn/tool-api/task_tracker.h>
 #include <dsn/dist/replication.h>
 #include <dsn/dist/replication/replication_other_types.h>
 #include <dsn/perf_counter/perf_counter_wrapper.h>
-#include <dsn/tool-api/task_tracker.h>
 
-#include <event2/bufferevent.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <evhttp.h>
 #include <event2/event.h>
 #include <event2/http.h>
-#include <evhttp.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <event2/bufferevent.h>
 
 #include "../shell/commands.h"
-#include "table_hotspot_policy.h"
 #include "table_stats.h"
+#include "table_hotspot_policy.h"
 
 namespace pegasus {
 namespace server {
