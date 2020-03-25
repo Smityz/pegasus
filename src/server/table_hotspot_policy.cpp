@@ -52,7 +52,7 @@ void hotspot_calculator::start_alg()
             if (_points[i].read_hotpartition_counter->get_value() > kHotPartitionT) {
                 _over_threshold_times[i]++;
                 if (_over_threshold_times[i] > kHotRpcT) {
-                    notice_replica(this->_app_name, index);
+                    notice_replica(this->_app_name, i);
                     _over_threshold_times[index] = 0;
                 }
             }
