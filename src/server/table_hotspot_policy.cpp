@@ -42,9 +42,7 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
-static void hotspot_calculator::notice_replica(const std::string &app_name, const int partition_num)
-{
-}
+void hotspot_calculator::notice_replica(const std::string &app_name, const int partition_num) {}
 
 void hotspot_calculator::start_alg()
 {
