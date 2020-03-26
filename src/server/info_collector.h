@@ -135,7 +135,6 @@ private:
     uint32_t _storage_size_retry_wait_seconds;
     uint32_t _storage_size_retry_max_count;
     std::string _hotspot_detect_algorithm;
-    bool _hotkey_auto_detect;
     ::dsn::task_ptr _storage_size_stat_timer_task;
     ::dsn::utils::ex_lock_nr _capacity_unit_update_info_lock;
     // mapping 'node address' --> 'last updated timestamp'

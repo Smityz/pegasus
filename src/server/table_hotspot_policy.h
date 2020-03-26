@@ -5,11 +5,12 @@
 #pragma once
 
 #include <algorithm>
-#include <gtest/gtest_prod.h>
 #include <math.h>
 
 #include "hotspot_partition_data.h"
 #include <dsn/perf_counter/perf_counter.h>
+#include <dsn/dist/replication/duplication_common.h>
+#include <gtest/gtest_prod.h>
 
 namespace pegasus {
 namespace server {

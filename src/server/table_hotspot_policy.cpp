@@ -45,6 +45,30 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
                                                    const int partition_num)
 {
+    std::vector<::dsn::rpc_address> meta_servers;
+    replica_helper::load_meta_servers(meta_servers);
+
+    configuration_query_by_index_request req;
+    req.app_name = app_name;
+
+    _resolver = partition_resolver::get_resolver(cluster_name, meta_list, app_name);
+
+    ::dsn::rpc::call(
+        meta_servers,
+        RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
+        req,
+        &_tracker,
+        [partition_num](::dsn::error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
+            configuration_query_by_index_response response;
+            if (err != ::dsn::ERR_OK) {
+                ::dsn::unmarshall(resp, response);
+                if (response.err == ERR_OK) {
+                }
+            } else {
+                end_ping(err, std::move(resp), nullptr);
+            }
+        },
+        std::chrono::milliseconds(5000));
 }
 
 void hotspot_calculator::start_alg()
