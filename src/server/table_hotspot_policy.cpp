@@ -3,7 +3,15 @@
 // can be found in the LICENSE file in the root directory of this source tree.
 
 #include "table_hotspot_policy.h"
+
 #include <dsn/dist/fmt_logging.h>
+#include <dsn/tool-api/rpc_address.h>
+#include <dsn/tool-api/group_address.h>
+#include <dsn/cpp/rpc_holder.h>
+#include <dsn/cpp/serialization_helper/dsn.layer2_types.h>
+#include <dsn/cpp/message_utils.h>
+
+using namespace dsn;
 
 namespace pegasus {
 namespace server {
@@ -45,30 +53,27 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
                                                    const int partition_num)
 {
-    std::vector<::dsn::rpc_address> meta_servers;
+    std::vector< : rpc_address> meta_servers;
     replica_helper::load_meta_servers(meta_servers);
+    rpc_address meta_server;
+
+    meta_server.assign_group("meta-servers");
+    for (auto &ms : meta_servers) {
+        meta_server.group_address()->add(ms);
+    }
 
     configuration_query_by_index_request req;
     req.app_name = app_name;
+    auto cluster_name = replication::get_current_cluster_name();
 
-    _resolver = partition_resolver::get_resolver(cluster_name, meta_list, app_name);
+    auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
 
-    ::dsn::rpc::call(
-        meta_servers,
-        RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
-        req,
-        &_tracker,
-        [partition_num](::dsn::error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
-            configuration_query_by_index_response response;
-            if (err != ::dsn::ERR_OK) {
-                ::dsn::unmarshall(resp, response);
-                if (response.err == ERR_OK) {
-                }
-            } else {
-                end_ping(err, std::move(resp), nullptr);
-            }
-        },
-        std::chrono::milliseconds(5000));
+    typedef rpc_holder<configuration_query_by_index_request, configuration_query_by_index_response>
+        configuration_query_by_index_rpc;
+    configuration_query_by_index_request request;
+    request.app_name = app_name;
+    message_ex *msg = dsn::message_ex::create_request(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX);
+    marshall(msg, request);
 }
 
 void hotspot_calculator::start_alg()
