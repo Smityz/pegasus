@@ -57,35 +57,40 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
                                                    const int partition_index)
 {
-    std::vector<rpc_address> meta_servers;
-    replica_helper::load_meta_servers(meta_servers);
-    rpc_address meta_server;
+    ddebug("start to notice_replica");
+    // std::vector<rpc_address> meta_servers;
+    // replica_helper::load_meta_servers(meta_servers);
+    // rpc_address meta_server;
 
-    meta_server.assign_group("meta-servers");
-    for (auto &ms : meta_servers) {
-        meta_server.group_address()->add(ms);
-    }
-    auto cluster_name = replication::get_current_cluster_name();
-    auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
+    // meta_server.assign_group("meta-servers");
+    // for (auto &ms : meta_servers) {
+    //     meta_server.group_address()->add(ms);
+    // }
+    // auto cluster_name = replication::get_current_cluster_name();
+    // auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers,
+    // app_name.c_str());
+
     auto msg = dsn::message_ex::create_request(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX, 1000);
 
     configuration_query_by_index_request req;
     req.app_name = app_name;
     req.partition_indices.push_back(partition_index);
     marshall(msg, req);
-
+    ddebug("start to notice_replica1");
     auto result =
         rpc::call(meta_server,
                   msg,
                   nullptr,
                   [partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
                       std::cout << "TYZYES!" << std::endl;
+                      ddebug("start to notice_replica2");
                   });
     result->wait();
 }
 
 void hotspot_calculator::start_alg()
 {
+    ddebug("start to start_alg");
     notice_replica(this->_app_name, 1);
     _policy->analysis(_app_data, _points);
     if (_hotkey_auto_detect) {
