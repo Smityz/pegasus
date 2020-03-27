@@ -50,14 +50,10 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
-DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
-                     TASK_PRIORITY_COMMON,
-                     THREAD_POOL_DEFAULT)
-
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
-                                                   const int partition_index)
+                                                   const int partition_num)
 {
-    std::vector<rpc_address> meta_servers;
+    std::vector< : rpc_address> meta_servers;
     replica_helper::load_meta_servers(meta_servers);
     rpc_address meta_server;
 
@@ -65,23 +61,19 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
     for (auto &ms : meta_servers) {
         meta_server.group_address()->add(ms);
     }
-    auto cluster_name = replication::get_current_cluster_name();
-    auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
-    auto msg = dsn::message_ex::create_request(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX, 1000);
 
     configuration_query_by_index_request req;
     req.app_name = app_name;
-    req.partition_indices.push_back(partition_index);
-    marshall(msg, req);
+    auto cluster_name = replication::get_current_cluster_name();
 
-    auto result = rpc::call(
-        meta_server,
-        msg,
-        &_tracker,
-        [this, partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
-            std::cout << "YES!" << std::endl;
-        });
-    result.wait();
+    auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
+
+    typedef rpc_holder<configuration_query_by_index_request, configuration_query_by_index_response>
+        configuration_query_by_index_rpc;
+    configuration_query_by_index_request request;
+    request.app_name = app_name;
+    message_ex *msg = dsn::message_ex::create_request(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX);
+    marshall(msg, request);
 }
 
 void hotspot_calculator::start_alg()
