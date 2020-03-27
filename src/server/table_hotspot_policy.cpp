@@ -74,13 +74,13 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
     req.partition_indices.push_back(partition_index);
     marshall(msg, req);
 
-    auto result = rpc::call(
-        meta_server,
-        msg,
-        nullptr,
-        [this, partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
-            std::cout << "YES!" << std::endl;
-        });
+    auto result =
+        rpc::call(meta_server,
+                  msg,
+                  nullptr,
+                  [partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
+                      std::cout << "YES!" << std::endl;
+                  });
     result.wait();
 }
 
