@@ -58,17 +58,16 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
                                                    const int partition_index)
 {
     ddebug("start to notice_replica");
-    // std::vector<rpc_address> meta_servers;
-    // replica_helper::load_meta_servers(meta_servers);
-    // rpc_address meta_server;
+    std::vector<rpc_address> meta_servers;
+    replica_helper::load_meta_servers(meta_servers);
+    rpc_address meta_server;
 
-    // meta_server.assign_group("meta-servers");
-    // for (auto &ms : meta_servers) {
-    //     meta_server.group_address()->add(ms);
-    // }
-    // auto cluster_name = replication::get_current_cluster_name();
-    // auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers,
-    // app_name.c_str());
+    meta_server.assign_group("meta-servers");
+    for (auto &ms : meta_servers) {
+        meta_server.group_address()->add(ms);
+    }
+    auto cluster_name = replication::get_current_cluster_name();
+    auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
 
     auto msg = dsn::message_ex::create_request(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX, 1000);
 
