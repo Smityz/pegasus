@@ -79,13 +79,14 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
                   msg,
                   nullptr,
                   [partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
-                      std::cout << "YES!" << std::endl;
+                      std::cout << "TYZYES!" << std::endl;
                   });
     result->wait();
 }
 
 void hotspot_calculator::start_alg()
 {
+    notice_replica(this->_app_name, 1);
     _policy->analysis(_app_data, _points);
     if (_hotkey_auto_detect) {
         for (int i = 0; i < _points.size(); i++) {
