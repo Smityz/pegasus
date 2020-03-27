@@ -77,7 +77,7 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
     auto result = rpc::call(
         meta_server,
         msg,
-        &_tracker,
+        nullptr,
         [this, partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
             std::cout << "YES!" << std::endl;
         });
