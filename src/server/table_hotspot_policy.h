@@ -10,7 +10,6 @@
 #include "hotspot_partition_data.h"
 #include <dsn/dist/replication/duplication_common.h>
 #include <dsn/perf_counter/perf_counter.h>
-#include <dsn/tool-api/task_tracker.h>
 #include <gtest/gtest_prod.h>
 
 namespace pegasus {
@@ -74,7 +73,6 @@ private:
     bool _hotkey_auto_detect;
     const int kMaxQueueSize = 100;
     int kHotPartitionT, kHotRpcT;
-    dsn::task_tracker _tracker;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };
 } // namespace server
