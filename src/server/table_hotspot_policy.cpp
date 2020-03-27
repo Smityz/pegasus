@@ -75,15 +75,16 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
     req.app_name = app_name;
     req.partition_indices.push_back(partition_index);
     marshall(msg, req);
-    ddebug("start to notice_replica1");
-    auto result =
-        rpc::call(meta_server,
-                  msg,
-                  nullptr,
-                  [partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *resp) {
-                      std::cout << "TYZYES!" << std::endl;
-                      ddebug("start to notice_replica2");
-                  });
+    auto result = rpc::call(
+        meta_server,
+        msg,
+        nullptr,
+        [partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *response) {
+            configuration_query_by_index_response resp;
+            unmarshall(response, resp);
+            ddebug("start to sendrpc");
+            ddebug("resp.app_id %d %d", resp.app_id, resp.is_stateful);
+        });
     result->wait();
 }
 
