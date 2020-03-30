@@ -68,24 +68,13 @@ DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
     }
     auto cluster_name = replication::get_current_cluster_name();
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
-
-    auto msg = dsn::message_ex::create_request(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX, 1000);
-
-    configuration_query_by_index_request req;
-    req.app_name = app_name;
-    req.partition_indices.push_back(partition_index);
-    marshall(msg, req);
-    auto result = rpc::call(
-        meta_server,
-        msg,
-        nullptr,
-        [partition_index](error_code err, dsn::message_ex *req, dsn::message_ex *response) {
-            configuration_query_by_index_response resp;
-            unmarshall(response, resp);
-            ddebug("start to sendrpc");
-            ddebug("resp.app_id %d %d", resp.app_id, resp.is_stateful);
-        });
-    result->wait();
+    resolver->call_op(RPC_RRDB_RRDB_MULTI_PUT,
+                      args,
+                      &_tracker,
+                      std::forward<TCallback>(callback),
+                      timeout,
+                      request_partition_hash,
+                      reply_thread_hash);
 }
 
 void hotspot_calculator::start_alg()
