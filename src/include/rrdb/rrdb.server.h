@@ -124,6 +124,18 @@ protected:
         std::cout << "... exec RPC_RRDB_RRDB_CLEAR_SCANNER ... (not implemented) " << std::endl;
     }
 
+    // RPC_DETECT_HOTKEY
+    virtual void on_clear_scanner(const int64_t &args)
+    {
+        std::cout << "... exec RPC_DETECT_HOTKEY ... (not implemented) " << std::endl;
+    }
+
+    // RPC_STOP_DETECT_HOTKEY
+    virtual void on_clear_scanner(const int64_t &args)
+    {
+        std::cout << "... exec RPC_STOP_DETECT_HOTKEY ... (not implemented) " << std::endl;
+    }
+
     static void register_rpc_handlers()
     {
         register_async_rpc_handler(RPC_RRDB_RRDB_PUT, "put", on_put);
@@ -140,6 +152,9 @@ protected:
         register_async_rpc_handler(RPC_RRDB_RRDB_GET_SCANNER, "get_scanner", on_get_scanner);
         register_async_rpc_handler(RPC_RRDB_RRDB_SCAN, "scan", on_scan);
         register_async_rpc_handler(RPC_RRDB_RRDB_CLEAR_SCANNER, "clear_scanner", on_clear_scanner);
+        register_async_rpc_handler(RPC_DETECT_HOTKEY, "detect_hotkey", detect_hotkey);
+        register_async_rpc_handler(
+            RPC_STOP_DETECT_HOTKEY, "stop_detect_hotkey", stop_detect_hotkey);
     }
 
 private:

@@ -279,20 +279,20 @@ struct duplicate_response
 
 
 struct hotkey_detect_request {
-  optional gpid partition;
+  1: optional gpid partition;
 }
 
 struct hotkey_detect_response {
-  optional int err;
-  optional blob hashkey;
+  1: optional int err;
+  2: optional blob hashkey;
 }
 
 struct stop_hotkey_detect_request {
-  optional gpid partition;
+  1: optional gpid partition;
 }
 
 struct stop_hotkey_detect_response {
-  optional int err;
+  2: optional int err;
 }
 
 service rrdb
