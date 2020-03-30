@@ -292,7 +292,7 @@ struct stop_hotkey_detect_request {
 }
 
 struct stop_hotkey_detect_response {
-  1: optional int err;
+  1: optional i32 err;
 }
 
 service rrdb
