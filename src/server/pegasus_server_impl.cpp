@@ -1490,6 +1490,11 @@ void pegasus_server_impl::on_scan(const ::dsn::apps::scan_request &request,
 
 void pegasus_server_impl::on_clear_scanner(const int64_t &args) { _context_cache.fetch(args); }
 
+void pegasus_server_impl::on_detect_hotkey(const ::dsn::apps::scan_request &request,
+                                           ::dsn::rpc_replier<::dsn::apps::scan_response> &reply)
+{
+}
+
 ::dsn::error_code pegasus_server_impl::start(int argc, char **argv)
 {
     dassert_replica(!_is_open, "replica is already opened.");

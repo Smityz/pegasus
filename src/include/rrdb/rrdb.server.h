@@ -125,15 +125,9 @@ protected:
     }
 
     // RPC_DETECT_HOTKEY
-    virtual void on_clear_scanner(const int64_t &args)
+    virtual void on_detect_hotkey(const int64_t &args)
     {
         std::cout << "... exec RPC_DETECT_HOTKEY ... (not implemented) " << std::endl;
-    }
-
-    // RPC_STOP_DETECT_HOTKEY
-    virtual void on_clear_scanner(const int64_t &args)
-    {
-        std::cout << "... exec RPC_STOP_DETECT_HOTKEY ... (not implemented) " << std::endl;
     }
 
     static void register_rpc_handlers()
@@ -153,8 +147,6 @@ protected:
         register_async_rpc_handler(RPC_RRDB_RRDB_SCAN, "scan", on_scan);
         register_async_rpc_handler(RPC_RRDB_RRDB_CLEAR_SCANNER, "clear_scanner", on_clear_scanner);
         register_async_rpc_handler(RPC_DETECT_HOTKEY, "detect_hotkey", detect_hotkey);
-        register_async_rpc_handler(
-            RPC_STOP_DETECT_HOTKEY, "stop_detect_hotkey", stop_detect_hotkey);
     }
 
 private:
@@ -235,6 +227,12 @@ private:
     static void on_clear_scanner(rrdb_service *svc, const int64_t &args)
     {
         svc->on_clear_scanner(args);
+    }
+    static void on_hotkey_detect(rrdb_service *svc,
+                                 const scan_request &args,
+                                 ::dsn::rpc_replier<hotkey_detect_response> &reply)
+    {
+        svc->on_hotkey_detect(args, reply);
     }
 };
 } // namespace apps
