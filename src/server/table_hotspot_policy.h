@@ -34,7 +34,6 @@ public:
 // hotspot_calculator is used to find the hotspot in Pegasus
 class hotspot_calculator
 {
-private:
 public:
     hotspot_calculator(const std::string &app_name,
                        const int partition_num,

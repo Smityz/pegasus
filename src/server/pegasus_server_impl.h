@@ -53,9 +53,7 @@ public:
     virtual void on_scan(const ::dsn::apps::scan_request &args,
                          ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
     virtual void on_clear_scanner(const int64_t &args) override;
-    virtual void on_scan(const ::dsn::apps::scan_request &args,
-                         ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
-    virtual void on_hotkey_detect(const ::dsn::apps::scan_request &args,
+    virtual void on_detect_hotkey(const ::dsn::apps::scan_request &args,
                                   ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
 
     // input:
@@ -329,6 +327,9 @@ private:
 
     std::unique_ptr<capacity_unit_calculator> _cu_calculator;
     std::unique_ptr<pegasus_server_write> _server_write;
+
+    std::atomic<bool> _is_hotkey_collector(false);
+    std::unique_ptr<hotkey_collector> _hotkey_collector;
 
     uint32_t _checkpoint_reserve_min_count_in_config;
     uint32_t _checkpoint_reserve_time_seconds_in_config;

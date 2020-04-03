@@ -146,7 +146,7 @@ protected:
         register_async_rpc_handler(RPC_RRDB_RRDB_GET_SCANNER, "get_scanner", on_get_scanner);
         register_async_rpc_handler(RPC_RRDB_RRDB_SCAN, "scan", on_scan);
         register_async_rpc_handler(RPC_RRDB_RRDB_CLEAR_SCANNER, "clear_scanner", on_clear_scanner);
-        register_async_rpc_handler(RPC_DETECT_HOTKEY, "detect_hotkey", detect_hotkey);
+        register_async_rpc_handler(RPC_DETECT_HOTKEY, "detect_hotkey", on_detect_hotkey);
     }
 
 private:
@@ -228,11 +228,11 @@ private:
     {
         svc->on_clear_scanner(args);
     }
-    static void on_hotkey_detect(rrdb_service *svc,
+    static void on_detect_hotkey(rrdb_service *svc,
                                  const scan_request &args,
                                  ::dsn::rpc_replier<hotkey_detect_response> &reply)
     {
-        svc->on_hotkey_detect(args, reply);
+        svc->on_detect_hotkey(args, reply);
     }
 };
 } // namespace apps
