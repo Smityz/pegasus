@@ -2858,5 +2858,5 @@ void pegasus_server_impl::release_db()
     _db = nullptr;
 }
 
-} // namespace pegasus
+} // namespace server
 } // namespace pegasus
