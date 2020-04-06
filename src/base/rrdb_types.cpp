@@ -4695,7 +4695,7 @@ void hotkey_detect_response::__set_err(const int32_t val) {
 __isset.err = true;
 }
 
-void hotkey_detect_response::__set_hashkey(const  ::dsn::blob& val) {
+void hotkey_detect_response::__set_hashkey(const std::string& val) {
   this->hashkey = val;
 __isset.hashkey = true;
 }
@@ -4730,8 +4730,8 @@ uint32_t hotkey_detect_response::read(::apache::thrift::protocol::TProtocol* ipr
         }
         break;
       case 2:
-        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
-          xfer += this->hashkey.read(iprot);
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->hashkey);
           this->__isset.hashkey = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -4760,8 +4760,8 @@ uint32_t hotkey_detect_response::write(::apache::thrift::protocol::TProtocol* op
     xfer += oprot->writeFieldEnd();
   }
   if (this->__isset.hashkey) {
-    xfer += oprot->writeFieldBegin("hashkey", ::apache::thrift::protocol::T_STRUCT, 2);
-    xfer += this->hashkey.write(oprot);
+    xfer += oprot->writeFieldBegin("hashkey", ::apache::thrift::protocol::T_STRING, 2);
+    xfer += oprot->writeString(this->hashkey);
     xfer += oprot->writeFieldEnd();
   }
   xfer += oprot->writeFieldStop();

@@ -1894,18 +1894,18 @@ class hotkey_detect_response {
   hotkey_detect_response(hotkey_detect_response&&);
   hotkey_detect_response& operator=(const hotkey_detect_response&);
   hotkey_detect_response& operator=(hotkey_detect_response&&);
-  hotkey_detect_response() : err(0) {
+  hotkey_detect_response() : err(0), hashkey() {
   }
 
   virtual ~hotkey_detect_response() throw();
   int32_t err;
-   ::dsn::blob hashkey;
+  std::string hashkey;
 
   _hotkey_detect_response__isset __isset;
 
   void __set_err(const int32_t val);
 
-  void __set_hashkey(const  ::dsn::blob& val);
+  void __set_hashkey(const std::string& val);
 
   bool operator == (const hotkey_detect_response & rhs) const
   {
