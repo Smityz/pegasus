@@ -50,10 +50,6 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
-DEFINE_TASK_CODE_RPC(RPC_CM_QUERY_PARTITION_CONFIG_BY_INDEX,
-                     TASK_PRIORITY_COMMON,
-                     THREAD_POOL_DEFAULT)
-
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
                                                    const int partition_index)
 {
