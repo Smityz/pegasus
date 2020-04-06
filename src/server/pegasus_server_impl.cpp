@@ -1605,14 +1605,14 @@ void pegasus_server_impl::on_stop_detect_hotkey(hotkey_rpc rpc)
                            restore_dir.c_str());
                     return ::dsn::ERR_FILE_OPERATION_FAILED;
                 } else {
-                    dwarn("%s: try to restore and restore_dir(%s) isn't exist, but we don't "
-                          "force "
-                          "it, the role of this replica must not primary, so we open a new db "
-                          "on the "
-                          "path(%s)",
-                          replica_name(),
-                          restore_dir.c_str(),
-                          path.c_str());
+                    db_exist = false;
+                    dwarn(
+                        "%s: try to restore and restore_dir(%s) isn't exist, but we don't force "
+                        "it, the role of this replica must not primary, so we open a new db on the "
+                        "path(%s)",
+                        replica_name(),
+                        restore_dir.c_str(),
+                        path.c_str());
                 }
             }
         }
@@ -1704,15 +1704,15 @@ void pegasus_server_impl::on_stop_detect_hotkey(hotkey_rpc rpc)
     // set default usage scenario after db opened.
     set_usage_scenario(ROCKSDB_ENV_USAGE_SCENARIO_NORMAL);
 
-    dinfo("%s: start the update rocksdb statistics timer task", replica_name());
+    dinfo_replica("start the update rocksdb statistics timer task");
     _update_replica_rdb_stat =
         ::dsn::tasking::enqueue_timer(LPC_REPLICATION_LONG_COMMON,
                                       &_tracker,
                                       [this]() { this->update_replica_rocksdb_statistics(); },
                                       _update_rdb_stat_interval);
 
-    // Block cache is a singleton on this server shared by all replicas, its metrics update
-    // task should be scheduled once an interval on the server view.
+    // Block cache is a singleton on this server shared by all replicas, its metrics update task
+    // should be scheduled once an interval on the server view.
     static std::once_flag flag;
     std::call_once(flag, [&]() {
         // The timer task will always running even though there is no replicas
