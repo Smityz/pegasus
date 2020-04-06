@@ -1373,12 +1373,11 @@ void pegasus_server_impl::on_get_scanner(const ::dsn::apps::get_scanner_request 
         // if the context is used, it will be fetched and re-put into cache,
         // which will change the handle,
         // then the delayed task will fetch null context by old handle, and do nothing.
-        ::dsn::tasking::enqueue(
-            LPC_PEGASUS_SERVER_DELAY,
-            &_tracker,
-            [this, handle]() { _context_cache.fetch(handle); },
-            0,
-            std::chrono::minutes(5));
+        ::dsn::tasking::enqueue(LPC_PEGASUS_SERVER_DELAY,
+                                &_tracker,
+                                [this, handle]() { _context_cache.fetch(handle); },
+                                0,
+                                std::chrono::minutes(5));
     } else {
         // scan completed
         resp.context_id = pegasus::SCAN_CONTEXT_ID_COMPLETED;
@@ -1486,12 +1485,11 @@ void pegasus_server_impl::on_scan(const ::dsn::apps::scan_request &request,
             // scan not completed
             int64_t handle = _context_cache.put(std::move(context));
             resp.context_id = handle;
-            ::dsn::tasking::enqueue(
-                LPC_PEGASUS_SERVER_DELAY,
-                &_tracker,
-                [this, handle]() { _context_cache.fetch(handle); },
-                0,
-                std::chrono::minutes(5));
+            ::dsn::tasking::enqueue(LPC_PEGASUS_SERVER_DELAY,
+                                    &_tracker,
+                                    [this, handle]() { _context_cache.fetch(handle); },
+                                    0,
+                                    std::chrono::minutes(5));
         } else {
             // scan completed
             resp.context_id = pegasus::SCAN_CONTEXT_ID_COMPLETED;
@@ -1707,11 +1705,11 @@ void pegasus_server_impl::on_stop_detect_hotkey(hotkey_rpc rpc)
     set_usage_scenario(ROCKSDB_ENV_USAGE_SCENARIO_NORMAL);
 
     dinfo("%s: start the update rocksdb statistics timer task", replica_name());
-    _update_replica_rdb_stat = ::dsn::tasking::enqueue_timer(
-        LPC_REPLICATION_LONG_COMMON,
-        &_tracker,
-        [this]() { this->update_replica_rocksdb_statistics(); },
-        _update_rdb_stat_interval);
+    _update_replica_rdb_stat =
+        ::dsn::tasking::enqueue_timer(LPC_REPLICATION_LONG_COMMON,
+                                      &_tracker,
+                                      [this]() { this->update_replica_rocksdb_statistics(); },
+                                      _update_rdb_stat_interval);
 
     // Block cache is a singleton on this server shared by all replicas, its metrics update
     // task should be scheduled once an interval on the server view.
@@ -1735,11 +1733,10 @@ else
     derror("%s: open app failed, error = %s", replica_name(), status.ToString().c_str());
     return ::dsn::ERR_LOCAL_APP_FAILURE;
 }
-::dsn::tasking::enqueue_timer(
-    LPC_ANALYZE_HOTKEY,
-    &_tracker,
-    [this]() { this->_hotkey_collector.analyse_data() },
-    _hotkey_analyse);
+::dsn::tasking::enqueue_timer(LPC_ANALYZE_HOTKEY,
+                              &_tracker,
+                              [this]() { this->_hotkey_collector.analyse_data() },
+                              _hotkey_analyse);
 } // namespace server
 
 void pegasus_server_impl::cancel_background_work(bool wait)
@@ -2753,15 +2750,14 @@ uint64_t pegasus_server_impl::do_manual_compact(const rocksdb::CompactRangeOptio
         // we will try to generate it again, and it will probably succeed because at least some
         // empty data is written into rocksdb by periodic group check.
         ddebug_replica("release storage failed after manual compact, will retry after 5 minutes");
-        ::dsn::tasking::enqueue(
-            LPC_PEGASUS_SERVER_DELAY,
-            &_tracker,
-            [this]() {
-                ddebug_replica("retry release storage after manual compact");
-                release_storage_after_manual_compact();
-            },
-            0,
-            std::chrono::minutes(5));
+        ::dsn::tasking::enqueue(LPC_PEGASUS_SERVER_DELAY,
+                                &_tracker,
+                                [this]() {
+                                    ddebug_replica("retry release storage after manual compact");
+                                    release_storage_after_manual_compact();
+                                },
+                                0,
+                                std::chrono::minutes(5));
     }
 
     // update rocksdb statistics immediately
