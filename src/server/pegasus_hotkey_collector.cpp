@@ -66,6 +66,12 @@ pegasus_hotkey_collector::analyse_fine_data()
     return true;
 }
 
+void reply_rpc(hotkey_rpc rpc)
+{
+    auto &response = rpc.response();
+    response
+}
+
 pegasus_hotkey_collector::analyse_data()
 {
     if (_collector_status.load(std::memory_order_seq_cst) == 1) {
@@ -75,13 +81,14 @@ pegasus_hotkey_collector::analyse_data()
             _coarse_result.store(coarse_result, std::memory_order_seq_cst);
         }
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 2)
+    if (_collector_status.load(std::memory_order_seq_cst) == 2) {
         if (analyse_fine_data()) {
             _collector_status.load(std::memory_order_seq_cst) = 3;
         }
-    if (_collector_status.load(std::memory_order_seq_cst) == 3)
-        if (send_RPC_back_successful)
-            clear_data;
+    }
+    if (_collector_status.load(std::memory_order_seq_cst) == 3) {
+        reply_rpc(rpc);
+    }
     collector_status = stop;
     if (time_out)
         clear_data;

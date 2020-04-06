@@ -284,7 +284,7 @@ struct hotkey_detect_request {
 
 struct hotkey_detect_response {
   1: optional i32 err;
-  2: optional dsn.blob hashkey;
+  2: optional string hashkey;
 }
 
 struct stop_hotkey_detect_request {
