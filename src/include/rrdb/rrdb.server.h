@@ -8,6 +8,7 @@ namespace dsn {
 namespace apps {
 
 typedef rpc_holder<hotkey_detect_request, hotkey_detect_response> hotkey_rpc;
+typedef rpc_holder<stop_hotkey_detect_request, stop_hotkey_detect_response> stop_hotkey_rpc;
 
 class rrdb_service : public replication::replication_app_base,
                      public replication::storage_serverlet<rrdb_service>
@@ -133,6 +134,12 @@ protected:
         std::cout << "... exec RPC_DETECT_HOTKEY ... (not implemented) " << std::endl;
     }
 
+    // RPC_STOP_DETECT_HOTKEY
+    virtual void on_stop_detect_hotkey(stop_hotkey_rpc rpc)
+    {
+        std::cout << "... exec RPC_STOP_DETECT_HOTKEY ... (not implemented) " << std::endl;
+    }
+
     static void register_rpc_handlers()
     {
         register_async_rpc_handler(RPC_RRDB_RRDB_PUT, "put", on_put);
@@ -150,6 +157,8 @@ protected:
         register_async_rpc_handler(RPC_RRDB_RRDB_SCAN, "scan", on_scan);
         register_async_rpc_handler(RPC_RRDB_RRDB_CLEAR_SCANNER, "clear_scanner", on_clear_scanner);
         register_rpc_handler_with_rpc_holder(RPC_DETECT_HOTKEY, "detect_hotkey", &on_detect_hotkey);
+        register_rpc_handler_with_rpc_holder(
+            RPC_STOP_DETECT_HOTKEY, "stop_detect_hotkey", &on_stop_detect_hotkey);
     }
 
 private:
@@ -232,6 +241,7 @@ private:
         svc->on_clear_scanner(args);
     }
     static void on_detect_hotkey(rrdb_service *svc, hotkey_rpc rpc) { svc->on_detect_hotkey(rpc); }
+    static void on_stop_detect_hotkey(rrdb_service *svc, stop_hotkey_rpc rpc) { svc->uu(rpc); }
 };
 } // namespace apps
 } // namespace dsn

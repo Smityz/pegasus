@@ -1517,6 +1517,12 @@ void pegasus_server_impl::on_clear_scanner(const int64_t &args) { _context_cache
 
 void pegasus_server_impl::on_detect_hotkey(hotkey_rpc rpc) { _hotkey_collector.init(rpc); }
 
+void pegasus_server_impl::on_stop_detect_hotkey(hotkey_rpc rpc)
+{
+    _hotkey_collector.stop();
+    rpc.response().err = 0;
+}
+
 ::dsn::error_code pegasus_server_impl::start(int argc, char **argv)
 {
     dassert_replica(!_is_open, "replica is already opened.");
