@@ -148,6 +148,7 @@ void info_collector::on_app_stat()
         get_app_counters(app_stats.app_name)->set(app_stats);
         // get row data statistics for all of the apps
         all_stats.merge(app_stats);
+
         // hotspot_calculator is to detect hotspots
         hotspot_calculator *hotspot_calculator =
             get_hotspot_calculator(app_rows.first, app_rows.second.size());
