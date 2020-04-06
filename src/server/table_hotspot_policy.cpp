@@ -50,6 +50,8 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
+inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
+
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
                                                    const int partition_index)
 {
@@ -64,13 +66,16 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
     auto cluster_name = replication::get_current_cluster_name();
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
-    resolver->call_op(RPC_RRDB_RRDB_MULTI_PUT,
+    // How can I get `reply_thread_hash`
+    hotkey_detect_request req;
+    req.partition = partition_index;
+    resolver->call_op(RPC_DETECT_HOTKEY,
                       args,
                       &_tracker,
-                      std::forward<TCallback>(callback),
-                      timeout,
-                      request_partition_hash,
-                      reply_thread_hash);
+                      empty_rpc_handler,
+                      60000,
+                      partition_index,
+                      0);
 }
 
 void hotspot_calculator::start_alg()

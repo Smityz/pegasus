@@ -300,7 +300,7 @@ pegasus_server_impl::pegasus_server_impl(dsn::replication::replica *r)
         "pegasus.server", "update_rdb_stat_interval", 600, "update_rdb_stat_interval, in seconds"));
 
     _hotkey_analyse = std::chrono::seconds(dsn_config_get_value_uint64(
-        "pegasus.server", "_hotkey_analyse", 600, "_hotkey_analyse, in seconds"));
+        "pegasus.server", "_hotkey_analyse", 5, "_hotkey_analyse, in seconds"));
 
     // TODO: move the qps/latency counters and it's statistics to replication_app_base layer
     std::string str_gpid = _gpid.to_string();
