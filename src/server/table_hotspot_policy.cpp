@@ -5,6 +5,13 @@
 #include "table_hotspot_policy.h"
 
 #include <dsn/dist/fmt_logging.h>
+#include <dsn/tool-api/rpc_address.h>
+#include <dsn/tool-api/group_address.h>
+#include <dsn/cpp/rpc_holder.h>
+#include <dsn/cpp/serialization_helper/dsn.layer2_types.h>
+#include <dsn/cpp/message_utils.h>
+
+using namespace dsn;
 
 namespace pegasus {
 namespace server {
@@ -43,7 +50,46 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
-void hotspot_calculator::start_alg() { _policy->analysis(_app_data, _points); }
+inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
+
+/*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
+                                                   const int partition_index)
+{
+    ddebug("start to notice_replica");
+    std::vector<rpc_address> meta_servers;
+    replica_helper::load_meta_servers(meta_servers);
+    rpc_address meta_server;
+
+    meta_server.assign_group("meta-servers");
+    for (auto &ms : meta_servers) {
+        meta_server.group_address()->add(ms);
+    }
+    auto cluster_name = replication::get_current_cluster_name();
+    auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
+    // How can I get `reply_thread_hash`
+    hotkey_detect_request req;
+    req.partition = partition_index;
+    resolver->call_op(
+       RPC_DETECT_HOTKEY, args, &_tracker, empty_rpc_handler, 60000, partition_index, 0);
+}
+
+void hotspot_calculator::start_alg()
+{
+    ddebug("start to start_alg");
+    notice_replica(this->_app_name, 1);
+    _policy->analysis(_app_data, _points);
+    if (_hotkey_auto_detect) {
+        for (int i = 0; i < _points.size(); i++) {
+            if (_points[i].read_hotpartition_counter->get_value() > kHotPartitionT) {
+                _over_threshold_times[i]++;
+                if (_over_threshold_times[i] > kHotRpcT) {
+                    notice_replica(this->_app_name, i);
+                    _over_threshold_times[i] = 0;
+                }
+            }
+        }
+    }
+}
 
 } // namespace server
 } // namespace pegasus

@@ -5,11 +5,12 @@
 #pragma once
 
 #include <algorithm>
-#include <gtest/gtest_prod.h>
 #include <math.h>
 
 #include "hotspot_partition_data.h"
+#include <dsn/dist/replication/duplication_common.h>
 #include <dsn/perf_counter/perf_counter.h>
+#include <gtest/gtest_prod.h>
 
 namespace pegasus {
 namespace server {
@@ -37,21 +38,40 @@ public:
     hotspot_calculator(const std::string &app_name,
                        const int partition_num,
                        std::unique_ptr<hotspot_policy> policy)
-        : _app_name(app_name), _points(partition_num), _policy(std::move(policy))
+        : _app_name(app_name),
+          _points(partition_num),
+          _policy(std::move(policy)),
+          kHotPartitionT(0),
+          kHotRpcT(0)
     {
         init_perf_counter(partition_num);
+        _hotkey_auto_detect =
+            dsn_config_get_value_bool("pegasus.collector",
+                                      "hotkey_auto_detect",
+                                      true,
+                                      "auto detect hot key in the hot paritition");
+        if (_hotkey_auto_detect) {
+            _over_threshold_times.resize(partition_num);
+            kHotPartitionT = (uint32_t)dsn_config_get_value_uint64(
+                "pegasus.collector", "kHotPartitionT", 4, "threshold of hotspot partition value");
+            kHotRpcT = (uint32_t)dsn_config_get_value_uint64(
+                "pegasus.collector", "kHotRpcT", 1, "threshold of send rpc to detect hotkey");
+        }
     }
     void aggregate(const std::vector<row_data> &partitions);
     void start_alg();
     void init_perf_counter(const int perf_counter_count);
+    static void notice_replica(const std::string &app_name, const int partition_num);
 
 private:
     const std::string _app_name;
     std::vector<hotpartition_counter> _points;
+    std::vector<int> _over_threshold_times;
     std::queue<std::vector<hotspot_partition_data>> _app_data;
     std::unique_ptr<hotspot_policy> _policy;
-    static const int kMaxQueueSize = 100;
-
+    bool _hotkey_auto_detect;
+    const int kMaxQueueSize = 100;
+    int kHotPartitionT, kHotRpcT;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };
 } // namespace server
