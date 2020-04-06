@@ -16,17 +16,18 @@ class hotkey_collector
 public:
     void capture_data(const ::dsn::blob &key) { capture_data(key.data()); }
 
-    void capture_data(dsn::message_ex **requests) { capture_data(requests[1].data()); }
+    void capture_data(const dsn::message_ex **requests) { capture_data(requests[1].data()); }
 
     void analyse_data();
 
-    void init(hotkey_detect_request r)
+    void init(hotkey_rpc r)
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
             r.response().err = ERR_SERVICE_ALREADY_EXIST;
         } else {
             rpc = r;
             _timestamp = dsn_now_s();
+            _collector_status.store(1, std::memory_order_seq_cst);
         }
     }
 
@@ -40,19 +41,27 @@ public:
             }
             _fine_capture_unit[i].mutex.unlock();
         }
-        _collector_status.store(0, std::memory_order_seq_cst);
         _coarse_result.store(-1, std::memory_order_seq_cst);
         _fine_result = "";
         _fine_count.clear();
+        _collector_status.store(0, std::memory_order_seq_cst);
     }
 
 private:
-    void capture_data(std::string data)
+    void capture_data(const std::string &data)
     {
-        if (_collector_status.load(std::memory_order_seq_cst) == 1)
+        if (_collector_status.load(std::memory_order_seq_cst) == 0) {
+            return;
+        }
+        if (_collector_status.load(std::memory_order_seq_cst) == 1) {
             capture_coarse_data(data);
-        if (_collector_status.load(std::memory_order_seq_cst) == 2)
+        }
+        if (_collector_status.load(std::memory_order_seq_cst) == 2) {
             capture_fine_data(data);
+        }
+        if (_collector_status.load(std::memory_order_seq_cst) == 3) {
+            return;
+        }
     }
     int analyse_coarse_data() {}
     void capture_coarse_data(const std::string &data);
@@ -70,6 +79,7 @@ private:
     std::string _fine_result;
     std::unordered_map<std::string, int> _fine_count;
     uint64_t timestamp;
+    const int kMaxTime = 100;
     hotkey_rpc rpc;
 }
 

@@ -66,14 +66,23 @@ pegasus_hotkey_collector::analyse_fine_data()
     return true;
 }
 
-void reply_rpc(hotkey_rpc rpc)
+void reply_rpc_success(hotkey_rpc rpc)
 {
     auto &response = rpc.response();
-    response
+    response.hashkey = _fine_result;
+}
+
+void reply_rpc_failed(hotkey_rpc rpc)
+{
+    auto &response = rpc.response();
+    response.err = ERR_NOT_FOUND_HOTKEY;
 }
 
 pegasus_hotkey_collector::analyse_data()
 {
+    if (_collector_status.load(std::memory_order_seq_cst) == 0) {
+        return;
+    }
     if (_collector_status.load(std::memory_order_seq_cst) == 1) {
         int coarse_result = analyse_coarse_data();
         if (coarse_result != -1) {
@@ -87,12 +96,13 @@ pegasus_hotkey_collector::analyse_data()
         }
     }
     if (_collector_status.load(std::memory_order_seq_cst) == 3) {
-        reply_rpc(rpc);
+        reply_rpc_success(rpc);
+        clear();
     }
-    collector_status = stop;
-    if (time_out)
-        clear_data;
-    collector_status = stop;
+    if (dsn_now_s() - _timestamp > kMaxTime) {
+        reply_rpc_failed(rpc);
+        clear();
+    }
 }
 
 pegasus_hotkey_collector::capture_coarse_data(std::string data)

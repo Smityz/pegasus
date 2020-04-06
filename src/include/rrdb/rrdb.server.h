@@ -231,10 +231,7 @@ private:
     {
         svc->on_clear_scanner(args);
     }
-    static void on_detect_hotkey(rrdb_service *svc, hotkey_rpc rpc)
-    {
-        svc->on_detect_hotkey(args, reply);
-    }
+    static void on_detect_hotkey(rrdb_service *svc, hotkey_rpc rpc) { svc->on_detect_hotkey(rpc); }
 };
 } // namespace apps
 } // namespace dsn

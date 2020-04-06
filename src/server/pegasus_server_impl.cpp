@@ -57,7 +57,8 @@ pegasus_server_impl::pegasus_server_impl(dsn::replication::replica *r)
       _last_durable_decree(0),
       _is_checkpointing(false),
       _manual_compact_svc(this),
-      _partition_version(0)
+      _partition_version(0),
+      _hotkey_collector(new hotkey_collector())
 {
     _primary_address = dsn::rpc_address(dsn_primary_address()).to_string();
     _gpid = get_gpid();
@@ -281,6 +282,9 @@ pegasus_server_impl::pegasus_server_impl(dsn::replication::replica *r)
 
     _update_rdb_stat_interval = std::chrono::seconds(dsn_config_get_value_uint64(
         "pegasus.server", "update_rdb_stat_interval", 600, "update_rdb_stat_interval, in seconds"));
+
+    _hotkey_analyse = std::chrono::seconds(dsn_config_get_value_uint64(
+        "pegasus.server", "_hotkey_analyse", 600, "_hotkey_analyse, in seconds"));
 
     // TODO: move the qps/latency counters and it's statistics to replication_app_base layer
     std::string str_gpid = _gpid.to_string();
@@ -566,10 +570,7 @@ int pegasus_server_impl::on_batched_write_requests(int64_t decree,
 {
     dassert(_is_open, "");
     dassert(requests != nullptr, "");
-
-    if (_is_hotkey_collector) {
-        _hotkey_collector.capture_data(key);
-    }
+    _hotkey_collector.capture_data(requests);
 
     return _server_write->on_batched_write_requests(requests, count, decree, timestamp);
 }
@@ -581,13 +582,7 @@ void pegasus_server_impl::on_get(const ::dsn::blob &key,
     _pfc_get_qps->increment();
     uint64_t start_time = dsn_now_ns();
 
-    if (_is_hotkey_collector.load(std::memory_order_relaxed) == true) {
-        if (_hotkey_collector != nullptr) {
-            derror("hotkey_collector is not initialization");
-        } else {
-            _hotkey_collector.capture_read_data(key);
-        }
-    }
+    _hotkey_collector.capture_data(key);
 
     ::dsn::apps::read_response resp;
     resp.app_id = _gpid.get_app_id();
@@ -1505,7 +1500,7 @@ void pegasus_server_impl::on_scan(const ::dsn::apps::scan_request &request,
 
 void pegasus_server_impl::on_clear_scanner(const int64_t &args) { _context_cache.fetch(args); }
 
-void pegasus_server_impl::on_detect_hotkey(hotkey_rpc rpc) {}
+void pegasus_server_impl::on_detect_hotkey(hotkey_rpc rpc) { _hotkey_collector.init(rpc); }
 
 ::dsn::error_code pegasus_server_impl::start(int argc, char **argv)
 {
@@ -1686,6 +1681,11 @@ void pegasus_server_impl::on_detect_hotkey(hotkey_rpc rpc) {}
         derror("%s: open app failed, error = %s", replica_name(), status.ToString().c_str());
         return ::dsn::ERR_LOCAL_APP_FAILURE;
     }
+    ::dsn::tasking::enqueue_timer(
+        LPC_ANALYZE_HOTKEY,
+        &_tracker,
+        [this]() { this->_hotkey_collector.analyse_data() },
+        _hotkey_analyse);
 }
 
 void pegasus_server_impl::cancel_background_work(bool wait)
