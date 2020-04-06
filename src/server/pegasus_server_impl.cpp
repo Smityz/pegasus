@@ -1726,6 +1726,7 @@ void pegasus_server_impl::on_stop_detect_hotkey(hotkey_rpc rpc)
     // initialize cu calculator and write service after server being initialized.
     _cu_calculator = dsn::make_unique<capacity_unit_calculator>(this);
     _server_write = dsn::make_unique<pegasus_server_write>(this, _verbose_log);
+
     return ::dsn::ERR_OK;
 }
 else

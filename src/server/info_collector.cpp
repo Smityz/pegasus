@@ -138,6 +138,7 @@ void info_collector::on_app_stat()
         derror("call get_app_stat() failed");
         return;
     }
+
     table_stats all_stats("_all_");
     for (const auto &app_rows : all_rows) {
         // get statistics data for app
