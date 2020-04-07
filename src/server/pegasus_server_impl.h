@@ -27,8 +27,6 @@ class meta_store;
 class capacity_unit_calculator;
 class pegasus_server_write;
 
-typedef rpc_holder<hotkey_detect_request, hotkey_detect_response> hotkey_rpc;
-
 class pegasus_server_impl : public ::dsn::apps::rrdb_service
 {
 public:
@@ -56,10 +54,12 @@ public:
     virtual void on_scan(const ::dsn::apps::scan_request &args,
                          ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
     virtual void on_clear_scanner(const int64_t &args) override;
-    virtual void on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
-                                ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
-    virtual void on_stop_detect_hotkey(const ::dsn::apps::stop_hotkey_detect_request &args,
-                                ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply) override;
+    virtual void
+    on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
+                     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
+    virtual void on_stop_detect_hotkey(
+        const ::dsn::apps::stop_hotkey_detect_request &args,
+        ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply) override;
 
     // input:
     //  - argc = 0 : re-open the db
