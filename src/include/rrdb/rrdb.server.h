@@ -157,8 +157,8 @@ protected:
         register_async_rpc_handler(RPC_RRDB_RRDB_GET_SCANNER, "get_scanner", on_get_scanner);
         register_async_rpc_handler(RPC_RRDB_RRDB_SCAN, "scan", on_scan);
         register_async_rpc_handler(RPC_RRDB_RRDB_CLEAR_SCANNER, "clear_scanner", on_clear_scanner);
-        serverlet::register_rpc_handler_with_rpc_holder(RPC_DETECT_HOTKEY, "detect_hotkey", &on_detect_hotkey);
-        serverlet:register_rpc_handler_with_rpc_holder(
+        register_rpc_handler_with_rpc_holder(RPC_DETECT_HOTKEY, "detect_hotkey", &on_detect_hotkey);
+        register_rpc_handler_with_rpc_holder(
             RPC_STOP_DETECT_HOTKEY, "stop_detect_hotkey", &on_stop_detect_hotkey);
     }
 
