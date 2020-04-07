@@ -9,8 +9,6 @@
 namespace pegasus {
 namespace server {
 
-typedef rpc_holder<hotkey_detect_request, hotkey_detect_response> hotkey_rpc;
-
 class hotkey_collector
 {
 public:
@@ -20,12 +18,14 @@ public:
 
     void analyse_data();
 
-    void init(hotkey_rpc r)
+    void init(::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
-            r.response().err = ERR_SERVICE_ALREADY_EXIST;
+            hotkey_detect_response resp;
+            resp.err = ERR_SERVICE_ALREADY_EXIST;
+            reply(resp);
         } else {
-            rpc = r;
+            _reply = reply;
             _timestamp = dsn_now_s();
             _collector_status.store(1, std::memory_order_seq_cst);
         }
@@ -78,9 +78,9 @@ private:
     } _fine_capture_unit[103];
     std::string _fine_result;
     std::unordered_map<std::string, int> _fine_count;
-    uint64_t timestamp;
+    uint64_t _timestamp;
     const int kMaxTime = 100;
-    hotkey_rpc rpc;
+    ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> _reply;
 }
 
 } // namespace server
