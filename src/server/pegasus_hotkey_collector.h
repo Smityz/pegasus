@@ -34,7 +34,7 @@ public:
     void init(::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
-            hotkey_detect_response resp;
+            ::dsn::apps::hotkey_detect_response resp;
             resp.err = ERR_SERVICE_ALREADY_EXIST;
             reply(resp);
         };
