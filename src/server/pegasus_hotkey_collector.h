@@ -40,6 +40,7 @@ public:
             reply(resp);
         };
         if (_collector_status.load(std::memory_order_seq_cst) == 0) {
+            ::dsn::apps::hotkey_detect_response resp;
             _timestamp = dsn_now_s();
             _collector_status.store(1, std::memory_order_seq_cst);
             reply(resp);
