@@ -82,7 +82,7 @@ private:
     const int analyse_coarse_data();
     void capture_coarse_data(const std::string &data);
     void capture_fine_data(const std::string &data);
-    bool analyse_fine_data(const std::string &data);
+    void analyse_fine_data(const std::string &data);
 
     std::atomic_uint _coarse_count[103];
     // _collector_status 0:stop 1:coarse 2:fine 3:finish
