@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <dsn/dist/replication/storage_serverlet.h>
+#include <dsn/cpp/serverlet.h>
 #include <rrdb/rrdb_types.h>
 
 namespace pegasus {
