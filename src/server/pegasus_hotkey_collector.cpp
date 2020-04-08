@@ -30,7 +30,7 @@ unsigned long rand_int() // [0,2^32-1]
     return ((MWC() ^ CONG()) + SHR3());
 }
 
-void hotkey_collector::capture_fine_data(std::string data)
+void hotkey_collector::capture_fine_data(const std::string &data)
 {
     unsigned long index = rand_int() % 103;
     std::unique_lock<std::mutex> lck(_fine_capture_unit[index].mutex, std::defer_lock);
