@@ -66,7 +66,6 @@ pegasus_hotkey_collector::analyse_fine_data()
     return true;
 }
 
-
 pegasus_hotkey_collector::analyse_data()
 {
     if (_collector_status.load(std::memory_order_seq_cst) == 0) {
@@ -140,8 +139,8 @@ pegasus_hotkey_collector::analyse_coarse_data()
                 hottest = hotkey_hash_bucket[i];
                 hottest_index = i;
             }
-            return hottest_index;
         }
+        return hottest_index;
     }
 }
 
