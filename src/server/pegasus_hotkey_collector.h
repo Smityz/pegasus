@@ -36,7 +36,7 @@ public:
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
             ::dsn::apps::hotkey_detect_response resp;
-            resp.err = ERR_SERVICE_ALREADY_EXIST;
+            resp.err = dsn::ERR_SERVICE_ALREADY_EXIST;
             reply(resp);
         };
         if (_collector_status.load(std::memory_order_seq_cst) == 0) {
