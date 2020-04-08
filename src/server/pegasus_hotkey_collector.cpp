@@ -30,7 +30,7 @@ unsigned long rand_int() // [0,2^32-1]
     return ((MWC() ^ CONG()) + SHR3());
 }
 
-pegasus_hotkey_collector::capture_fine_data(std::string data)
+hotkey_collector::capture_fine_data(std::string data)
 {
     unsigned long index = rand_int() % 103;
     std::unique_lock<std::mutex> lck(_fine_capture_unit[index].mutex, std::defer_lock);
@@ -42,7 +42,7 @@ pegasus_hotkey_collector::capture_fine_data(std::string data)
     }
 }
 
-pegasus_hotkey_collector::analyse_fine_data()
+hotkey_collector::analyse_fine_data()
 {
     for (int i = 0; i < 103; i++) {
         const std::lock_guard<std::mutex> lock(_fine_capture_unit[i].mutex);
@@ -66,7 +66,7 @@ pegasus_hotkey_collector::analyse_fine_data()
     return true;
 }
 
-pegasus_hotkey_collector::analyse_data()
+hotkey_collector::analyse_data()
 {
     if (_collector_status.load(std::memory_order_seq_cst) == 0) {
         return;
@@ -95,13 +95,13 @@ pegasus_hotkey_collector::analyse_data()
     }
 }
 
-pegasus_hotkey_collector::capture_coarse_data(std::string data)
+hotkey_collector::capture_coarse_data(std::string data)
 {
     size_t key_hash_val = std::hash(data) % 103;
     _coarse_count[key_hash_val].fetch_add(1, std::memory_order_release);
 }
 
-pegasus_hotkey_collector::analyse_coarse_data()
+hotkey_collector::analyse_coarse_data()
 {
     std::vector<uint> data_samples;
     data_samples.reserve(103);
