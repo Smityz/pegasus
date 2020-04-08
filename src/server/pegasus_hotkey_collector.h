@@ -16,7 +16,7 @@ public:
 
     void capture_data(const dsn::message_ex **requests)
     {
-        for (const auto &msg : requests->buffers) {
+        for (const auto &msg : requests->->buffers) {
             capture_data(msg.to_string());
         }
     }
