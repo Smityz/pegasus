@@ -30,7 +30,7 @@ public:
 
     void analyse_data();
 
-    // hotkey_collector() : _collector_status(0), _coarse_result(-1) {}
+    hotkey_collector() : _collector_status(0), _coarse_result(-1) {}
 
     void init(::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
     {
