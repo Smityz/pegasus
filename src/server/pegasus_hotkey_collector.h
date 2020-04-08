@@ -5,6 +5,7 @@
 #pragma once
 
 #include <dsn/cpp/serverlet.h>
+#include <dsn/utility/error_code.h>
 #include <rrdb/rrdb_types.h>
 
 namespace pegasus {
