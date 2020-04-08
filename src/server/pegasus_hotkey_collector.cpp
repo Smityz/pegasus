@@ -35,7 +35,7 @@ void hotkey_collector::capture_fine_data(const std::string &data)
     unsigned long index = rand_int() % 103;
     std::unique_lock<std::mutex> lck(_fine_capture_unit[index].mutex, std::defer_lock);
     if (lck.try_lock()) {
-        _fine_capture_unit[index].queue.emplace_back(data);
+        _fine_capture_unit[index].queue.emplace(data);
         while (_fine_capture_unit.size() > 1000) {
             _fine_capture_unit[index].queue.pop();
         }
@@ -53,7 +53,7 @@ void hotkey_collector::analyse_fine_data()
     }
     if (_fine_count.size() == 0) {
         derror("analyse_fine_data map size = 0");
-        return false;
+        return;
     }
     int count_max = -1;
     std::string count_max_key;
@@ -63,7 +63,7 @@ void hotkey_collector::analyse_fine_data()
             count_max_key = iter->first;
         }
     _fine_result = count_max_key;
-    return true;
+    return;
 }
 
 hotkey_collector::analyse_data()
