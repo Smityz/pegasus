@@ -19,6 +19,7 @@
 #include "pegasus_scan_context.h"
 #include "pegasus_manual_compact_service.h"
 #include "pegasus_write_service.h"
+#include "pegasus_hotkey_collector.h"
 
 namespace pegasus {
 namespace server {
