@@ -82,8 +82,8 @@ private:
 
     std::atomic_uint _coarse_count[103];
     // _collector_status 0:stop 1:coarse 2:fine 3:finish
-    std::atomic_ushort _collector_status;
-    std::atomic_int _coarse_result;
+    std::atomic<unsigned short> _collector_status;
+    std::atomic<int> _coarse_result;
     struct fine_capture_unit_struct
     {
         std::queue<std::string> queue;
