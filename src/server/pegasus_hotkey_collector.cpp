@@ -66,17 +66,6 @@ pegasus_hotkey_collector::analyse_fine_data()
     return true;
 }
 
-void reply_rpc_success(hotkey_rpc rpc)
-{
-    auto &response = rpc.response();
-    response.hashkey = _fine_result;
-}
-
-void reply_rpc_failed(hotkey_rpc rpc)
-{
-    auto &response = rpc.response();
-    response.err = ERR_NOT_FOUND_HOTKEY;
-}
 
 pegasus_hotkey_collector::analyse_data()
 {
@@ -96,11 +85,13 @@ pegasus_hotkey_collector::analyse_data()
         }
     }
     if (_collector_status.load(std::memory_order_seq_cst) == 3) {
-        reply_rpc_success(rpc);
+        hotkey_detect_response resp;
+        resp.hashkey = _fine_result;
         clear();
     }
     if (dsn_now_s() - _timestamp > kMaxTime) {
-        reply_rpc_failed(rpc);
+        hotkey_detect_response resp;
+        resp.err = ERR_NOT_FOUND_HOTKEY;
         clear();
     }
 }

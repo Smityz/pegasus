@@ -70,7 +70,7 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     hotkey_detect_request req;
     req.partition = partition_index;
     resolver->call_op(
-       RPC_DETECT_HOTKEY, args, &_tracker, empty_rpc_handler, 60000, partition_index, 0);
+        RPC_DETECT_HOTKEY, args, &_tracker, empty_rpc_handler, 60000, partition_index, 0);
 }
 
 void hotspot_calculator::start_alg()
