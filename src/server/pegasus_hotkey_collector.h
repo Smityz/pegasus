@@ -22,7 +22,7 @@ public:
         for (int i = 0; i < count; i++) {
             if (requests[i] == nullptr)
                 continue;
-            capture(requests[i]->buffers[1]->to_string());
+            capture(requests[i]->buffers[1].to_string());
         }
     }
 
