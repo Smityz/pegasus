@@ -14,10 +14,15 @@ class hotkey_collector
 public:
     void capture_data(const ::dsn::blob &key) { capture_data(key.to_string()); }
 
-    void capture_data(const dsn::message_ex **requests)
+    void capture_data(const dsn::message_ex **requests, const int count)
     {
-        for (const auto &msg : requests->->buffers) {
-            capture_data(msg.to_string());
+        if (count == 0) {
+            return;
+        }
+        for (int i = 0; i < count; i++) {
+            if (requests[i] == nullptr)
+                continue;
+            capture(requests[i]->buffer[1]->to_string());
         }
     }
 
