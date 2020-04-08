@@ -12,9 +12,14 @@ namespace server {
 class hotkey_collector
 {
 public:
-    void capture_data(const ::dsn::blob &key) { capture_data(key.data()); }
+    void capture_data(const ::dsn::blob &key) { capture_data(key.to_string()); }
 
-    void capture_data(const dsn::message_ex **requests) { capture_data(requests[1].data()); }
+    void capture_data(const dsn::message_ex **requests)
+    {
+        for (const auto &msg : requests.buffers) {
+            capture_data(msg.to_string());
+        }
+    }
 
     void analyse_data();
 
