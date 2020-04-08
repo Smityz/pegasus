@@ -83,7 +83,7 @@ private:
     uint64_t _timestamp;
     const int kMaxTime = 100;
     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> _reply;
-}
+};
 
 } // namespace server
 } // namespace pegasus
