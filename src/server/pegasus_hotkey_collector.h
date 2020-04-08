@@ -65,7 +65,7 @@ private:
             return;
         }
     }
-    int analyse_coarse_data() {}
+    void analyse_coarse_data();
     void capture_coarse_data(const std::string &data);
     void capture_fine_data(const std::string &data);
 
