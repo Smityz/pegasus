@@ -40,9 +40,9 @@ public:
             reply(resp);
         };
         if (_collector_status.load(std::memory_order_seq_cst) == 0) {
-            _reply = reply;
             _timestamp = dsn_now_s();
             _collector_status.store(1, std::memory_order_seq_cst);
+            reply(resp);
         }
     }
 
