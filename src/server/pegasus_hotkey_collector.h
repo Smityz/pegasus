@@ -18,6 +18,8 @@ public:
 
     void analyse_data();
 
+    hotkey_collector() : _collector_status(0), _coarse_result(-1) {}
+
     void init(::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
@@ -69,8 +71,8 @@ private:
 
     std::atomic_uint _coarse_count[103];
     // _collector_status 0:stop 1:coarse 2:fine 3:finish
-    std::atomic_ushort _collector_status(0);
-    std::atomic_int _coarse_result(-1);
+    std::atomic_ushort _collector_status;
+    std::atomic_int _coarse_result;
     struct fine_capture_unit_struct
     {
         std::queue<std::string> queue;
