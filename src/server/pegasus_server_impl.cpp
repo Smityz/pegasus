@@ -1515,14 +1515,24 @@ void pegasus_server_impl::on_scan(const ::dsn::apps::scan_request &request,
 
 void pegasus_server_impl::on_clear_scanner(const int64_t &args) { _context_cache.fetch(args); }
 
-void pegasus_server_impl::on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args)
+void pegasus_server_impl::on_detect_hotkey(
+    const ::dsn::apps::hotkey_detect_request &args,
+    ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
 {
     _hotkey_collector->init();
+    ::dsn::apps::hotkey_detect_response resp;
+    resp.err = ::dsn::ERR_OK;
+    reply(resp);
 }
 
-void pegasus_server_impl::on_stop_detect_hotkey(const ::dsn::apps::stop_hotkey_detect_request &args)
+void pegasus_server_impl::on_stop_detect_hotkey(
+    const ::dsn::apps::stop_hotkey_detect_request &args,
+    ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply)
 {
     _hotkey_collector->clear();
+    ::dsn::apps::stop_hotkey_detect_response resp;
+    resp.err = ::dsn::ERR_OK;
+    reply(resp);
 }
 
 ::dsn::error_code pegasus_server_impl::start(int argc, char **argv)

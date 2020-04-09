@@ -126,15 +126,21 @@ protected:
     }
 
     // RPC_DETECT_HOTKEY
-    virtual void on_detect_hotkey(const hotkey_detect_request &args)
+    virtual void on_detect_hotkey(const hotkey_detect_request &args,
+                                  ::dsn::rpc_replier<hotkey_detect_response> &reply)
     {
         std::cout << "... exec RPC_DETECT_HOTKEY ... (not implemented) " << std::endl;
+        hotkey_detect_response resp;
+        reply(resp);
     }
 
     // RPC_STOP_DETECT_HOTKEY
-    virtual void on_stop_detect_hotkey(const stop_hotkey_detect_request &args)
+    virtual void on_stop_detect_hotkey(const stop_hotkey_detect_request &args,
+                                       ::dsn::rpc_replier<stop_hotkey_detect_response> &reply)
     {
         std::cout << "... exec RPC_STOP_DETECT_HOTKEY ... (not implemented) " << std::endl;
+        stop_hotkey_detect_response resp;
+        reply(resp);
     }
 
     static void register_rpc_handlers()
@@ -237,13 +243,17 @@ private:
     {
         svc->on_clear_scanner(args);
     }
-    static void on_detect_hotkey(rrdb_service *svc, hotkey_detect_request &args)
+    static void on_detect_hotkey(rrdb_service *svc,
+                                 hotkey_detect_request &args,
+                                 ::dsn::rpc_replier<hotkey_detect_response> &reply)
     {
-        svc->on_detect_hotkey(args);
+        svc->on_detect_hotkey(args, reply);
     }
-    static void on_stop_detect_hotkey(rrdb_service *svc, stop_hotkey_detect_request &args)
+    static void on_stop_detect_hotkey(rrdb_service *svc,
+                                      stop_hotkey_detect_request &args,
+                                      ::dsn::rpc_replier<stop_hotkey_detect_response> &reply)
     {
-        svc->on_stop_detect_hotkey(args);
+        svc->on_stop_detect_hotkey(args, reply);
     }
 };
 } // namespace apps
