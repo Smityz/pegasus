@@ -36,7 +36,7 @@ void hotkey_collector::capture_fine_data(const std::string &data)
     std::unique_lock<std::mutex> lck(_fine_capture_unit[index].mutex, std::defer_lock);
     if (lck.try_lock()) {
         _fine_capture_unit[index].queue.emplace(data);
-        while (_fine_capture_unit[index].size() > 1000) {
+        while (_fine_capture_unit[index].queue.size() > 1000) {
             _fine_capture_unit[index].queue.pop();
         }
     }
@@ -66,7 +66,7 @@ void hotkey_collector::analyse_fine_data()
     return;
 }
 
-hotkey_collector::analyse_data()
+void hotkey_collector::analyse_data()
 {
     if (_collector_status.load(std::memory_order_seq_cst) == 0) {
         return;
