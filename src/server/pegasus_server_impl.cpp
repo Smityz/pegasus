@@ -1731,19 +1731,14 @@ void pegasus_server_impl::on_stop_detect_hotkey(const ::dsn::apps::stop_hotkey_d
     _cu_calculator = dsn::make_unique<capacity_unit_calculator>(this);
     _server_write = dsn::make_unique<pegasus_server_write>(this, _verbose_log);
 
+    ::dsn::tasking::enqueue_timer(
+        LPC_ANALYZE_HOTKEY,
+        &_tracker,
+        [this]() { this->_hotkey_collector->analyse_data() },
+        _hotkey_analyse);
+
     return ::dsn::ERR_OK;
 }
-else
-{
-    derror("%s: open app failed, error = %s", replica_name(), status.ToString().c_str());
-    return ::dsn::ERR_LOCAL_APP_FAILURE;
-}
-::dsn::tasking::enqueue_timer(
-    LPC_ANALYZE_HOTKEY,
-    &_tracker,
-    [this]() { this->_hotkey_collector.analyse_data() },
-    _hotkey_analyse);
-} // namespace server
 
 void pegasus_server_impl::cancel_background_work(bool wait)
 {
@@ -2865,5 +2860,5 @@ void pegasus_server_impl::release_db()
     _db = nullptr;
 }
 
-} // namespace pegasus
+} // namespace server
 } // namespace pegasus
