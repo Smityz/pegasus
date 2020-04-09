@@ -60,21 +60,7 @@ public:
     }
 
 private:
-    void capture_data(const std::string &data)
-    {
-        if (_collector_status.load(std::memory_order_seq_cst) == 0) {
-            return;
-        }
-        if (_collector_status.load(std::memory_order_seq_cst) == 1) {
-            capture_coarse_data(data);
-        }
-        if (_collector_status.load(std::memory_order_seq_cst) == 2) {
-            capture_fine_data(data);
-        }
-        if (_collector_status.load(std::memory_order_seq_cst) == 3) {
-            return;
-        }
-    }
+    void capture_data(const std::string &data);
     const int analyse_coarse_data();
     void capture_coarse_data(const std::string &data);
     void capture_fine_data(const std::string &data);

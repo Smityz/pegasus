@@ -68,6 +68,22 @@ bool hotkey_collector::analyse_fine_data()
     return true;
 }
 
+void hotkey_collector::capture_data(const std::string &data)
+{
+    if (_collector_status.load(std::memory_order_seq_cst) == 0) {
+        return;
+    }
+    if (_collector_status.load(std::memory_order_seq_cst) == 1) {
+        capture_coarse_data(data);
+    }
+    if (_collector_status.load(std::memory_order_seq_cst) == 2) {
+        capture_fine_data(data);
+    }
+    if (_collector_status.load(std::memory_order_seq_cst) == 3) {
+        return;
+    }
+}
+
 void hotkey_collector::analyse_data()
 {
     if (_collector_status.load(std::memory_order_seq_cst) == 0) {
