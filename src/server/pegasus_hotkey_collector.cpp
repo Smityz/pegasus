@@ -68,6 +68,20 @@ bool hotkey_collector::analyse_fine_data()
     return true;
 }
 
+void hotkey_collector::capture_data(dsn::message_ex **requests, const int count)
+{
+    if (count == 0) {
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        if (requests[i] == nullptr)
+            continue;
+        capture_data(requests[i]->buffers[1].to_string());
+    }
+}
+
+void hotkey_collector::capture_data(const ::dsn::blob &key) { capture_data(key.to_string()); }
+
 void hotkey_collector::capture_data(const std::string &data)
 {
     if (_collector_status.load(std::memory_order_seq_cst) == 0) {

@@ -14,22 +14,6 @@ namespace server {
 class hotkey_collector
 {
 public:
-    void capture_data(const ::dsn::blob &key) { capture_data(key.to_string()); }
-
-    void capture_data(dsn::message_ex **requests, const int count)
-    {
-        if (count == 0) {
-            return;
-        }
-        for (int i = 0; i < count; i++) {
-            if (requests[i] == nullptr)
-                continue;
-            capture_data(requests[i]->buffers[1].to_string());
-        }
-    }
-
-    void analyse_data();
-
     hotkey_collector() : _collector_status(0), _coarse_result(-1) {}
 
     void init()
@@ -59,11 +43,15 @@ public:
         _collector_status.store(0, std::memory_order_seq_cst);
     }
 
+    void capture_data(const ::dsn::blob &key);
+    void capture_data(dsn::message_ex **requests, const int count);
+    void analyse_data();
+
 private:
     void capture_data(const std::string &data);
-    const int analyse_coarse_data();
     void capture_coarse_data(const std::string &data);
     void capture_fine_data(const std::string &data);
+    const int analyse_coarse_data();
     bool analyse_fine_data();
 
     std::atomic_uint _coarse_count[103];
