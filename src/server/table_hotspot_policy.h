@@ -56,6 +56,11 @@ public:
                 "pegasus.collector", "kHotPartitionT", 4, "threshold of hotspot partition value");
             kHotRpcT = (uint32_t)dsn_config_get_value_uint64(
                 "pegasus.collector", "kHotRpcT", 1, "threshold of send rpc to detect hotkey");
+            _hotkey_rpc_interval = std::chrono::milliseconds((uint32_t)dsn_config_get_value_uint64(
+                "pegasus.collector",
+                "_hotkey_rpc_interval",
+                60000,
+                "time interval of sending hotkey detect RPC"));
         }
     }
     void aggregate(const std::vector<row_data> &partitions);
@@ -71,7 +76,8 @@ private:
     std::unique_ptr<hotspot_policy> _policy;
     bool _hotkey_auto_detect;
     const int kMaxQueueSize = 100;
-    int kHotPartitionT, kHotRpcT;
+    uint32_t kHotPartitionT, kHotRpcT;
+    std::chrono::milliseconds _hotkey_rpc_interval;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };
 } // namespace server

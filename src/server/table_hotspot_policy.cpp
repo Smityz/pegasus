@@ -10,6 +10,7 @@
 #include <dsn/cpp/rpc_holder.h>
 #include <dsn/cpp/serialization_helper/dsn.layer2_types.h>
 #include <dsn/cpp/message_utils.h>
+#include <rrdb/rrdb.code.definition.h>
 
 using namespace dsn;
 
@@ -69,8 +70,13 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     // How can I get `reply_thread_hash`
     hotkey_detect_request req;
     req.partition = partition_index;
-    resolver->call_op(
-        RPC_DETECT_HOTKEY, args, &_tracker, empty_rpc_handler, 60000, partition_index, 0);
+    resolver->call_op(RPC_DETECT_HOTKEY,
+                      args,
+                      &_tracker,
+                      empty_rpc_handler,
+                      _hotkey_rpc_interval,
+                      partition_index,
+                      0);
 }
 
 void hotspot_calculator::start_alg()
