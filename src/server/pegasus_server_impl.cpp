@@ -24,7 +24,6 @@
 #include "pegasus_event_listener.h"
 #include "pegasus_server_write.h"
 #include "meta_store.h"
-#include "pegasus_hotkey_collector.h"
 
 using namespace dsn::literals::chrono_literals;
 
