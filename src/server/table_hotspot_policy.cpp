@@ -7,9 +7,7 @@
 #include <dsn/dist/fmt_logging.h>
 #include <dsn/tool-api/rpc_address.h>
 #include <dsn/tool-api/group_address.h>
-#include <dsn/cpp/rpc_holder.h>
-#include <dsn/cpp/serialization_helper/dsn.layer2_types.h>
-#include <dsn/cpp/message_utils.h>
+#include <dsn/utility/error_code.h>
 #include <rrdb/rrdb_types.h>
 
 using namespace dsn;
@@ -69,13 +67,27 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
     hotkey_detect_request req;
     req.partition = partition_index;
-    resolver->call_op(RPC_DETECT_HOTKEY,
-                      req,
-                      &_tracker,
-                      empty_rpc_handler,
-                      _hotkey_rpc_interval,
-                      partition_index,
-                      0);
+    resolver->call_op(
+        RPC_DETECT_HOTKEY,
+        req,
+        &_tracker,
+        [this](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+            if (err == ERR_OK) {
+                hotkey_detect_response response;
+                ::dsn::unmarshall(resp, response);
+                if (response.err == ERR_OK) {
+                    ddebug("detect hotspot rpc sending succeed");
+                    return;
+                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
+                    ddebug("this hotspot rpc has been sending");
+                }
+            } else if (err == ERR_TIMEOUT) {
+                notice_replica(app_name, partition_index);
+            }
+        },
+        _hotkey_rpc_interval,
+        partition_index,
+        0);
 }
 
 void hotspot_calculator::start_alg()
