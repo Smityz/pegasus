@@ -239,11 +239,11 @@ private:
     }
     static void on_detect_hotkey(rrdb_service *svc, hotkey_detect_request &args)
     {
-        svc->on_detect_hotkey(args, reply);
+        svc->on_detect_hotkey(args);
     }
     static void on_stop_detect_hotkey(rrdb_service *svc, stop_hotkey_detect_request &args)
     {
-        svc->on_stop_detect_hotkey(args, reply);
+        svc->on_stop_detect_hotkey(args);
     }
 };
 } // namespace apps
