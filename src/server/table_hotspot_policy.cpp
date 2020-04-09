@@ -66,12 +66,11 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     auto cluster_name = replication::get_current_cluster_name();
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
     ::dsn::apps::hotkey_detect_request req;
-    req.partition = partition_index;
     resolver->call_op(
         RPC_DETECT_HOTKEY,
         req,
         &_tracker,
-        [this](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+        [](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
             if (err == ERR_OK) {
                 hotkey_detect_response response;
                 ::dsn::unmarshall(resp, response);
