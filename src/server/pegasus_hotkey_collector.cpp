@@ -63,7 +63,6 @@ bool hotkey_collector::analyse_fine_data()
             count_max_key = iter.first;
         }
     _fine_result = count_max_key;
-    derror("Hotkey result: [%s]", count_max_key);
     return true;
 }
 
@@ -75,23 +74,21 @@ void hotkey_collector::analyse_data()
     if (_collector_status.load(std::memory_order_seq_cst) == 1) {
         int coarse_result = analyse_coarse_data();
         if (coarse_result != -1) {
-            _collector_status.load(std::memory_order_seq_cst) = 2;
+            _collector_status.store(2, std::memory_order_seq_cst);
             _coarse_result.store(coarse_result, std::memory_order_seq_cst);
         }
     }
     if (_collector_status.load(std::memory_order_seq_cst) == 2) {
         if (analyse_fine_data()) {
-            _collector_status.load(std::memory_order_seq_cst) = 3;
+            _collector_status.store(3, std::memory_order_seq_cst);
         }
     }
     if (_collector_status.load(std::memory_order_seq_cst) == 3) {
-        hotkey_detect_response resp;
-        resp.hashkey = _fine_result;
+        derror("Hotkey result: [%s]", _fine_result);
         clear();
     }
     if (dsn_now_s() - _timestamp > kMaxTime) {
-        hotkey_detect_response resp;
-        resp.err = ERR_NOT_FOUND_HOTKEY;
+        derror("ERR_NOT_FOUND_HOTKEY");
         clear();
     }
 }
