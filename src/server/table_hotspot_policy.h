@@ -72,7 +72,6 @@ private:
     bool _hotkey_auto_detect;
     const int kMaxQueueSize = 100;
     uint32_t kHotPartitionT, kHotRpcT;
-    dsn::task_tracker _tracker;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };
 } // namespace server

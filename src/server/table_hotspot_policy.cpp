@@ -69,10 +69,10 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     resolver->call_op(
         RPC_DETECT_HOTKEY,
         req,
-        &_tracker,
+        nullptr,
         [](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
             if (err == ERR_OK) {
-                hotkey_detect_response response;
+                ::dsn::apps::hotkey_detect_response response;
                 ::dsn::unmarshall(resp, response);
                 if (response.err == ERR_OK) {
                     ddebug("detect hotspot rpc sending succeed");
