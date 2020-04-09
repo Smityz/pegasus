@@ -129,16 +129,12 @@ protected:
     virtual void on_detect_hotkey(const hotkey_detect_request &args)
     {
         std::cout << "... exec RPC_DETECT_HOTKEY ... (not implemented) " << std::endl;
-        hotkey_detect_response resp;
-        reply(resp);
     }
 
     // RPC_STOP_DETECT_HOTKEY
     virtual void on_stop_detect_hotkey(const stop_hotkey_detect_request &args)
     {
         std::cout << "... exec RPC_STOP_DETECT_HOTKEY ... (not implemented) " << std::endl;
-        stop_hotkey_detect_response resp;
-        reply(resp);
     }
 
     static void register_rpc_handlers()
