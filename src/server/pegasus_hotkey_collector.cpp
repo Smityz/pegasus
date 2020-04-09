@@ -118,7 +118,7 @@ const int hotkey_collector::analyse_coarse_data()
     }
     sd = sqrt(sd / 103);
     std::vector<uint> hotkey_hash_bucket;
-    for (int i = 0; i < data_sample.size(); i++) {
+    for (int i = 0; i < data_samples.size(); i++) {
         double hot_point = (data_samples[i] - avg) / sd;
         hot_point = ceil(std::max(hot_point, double(0)));
         if (hot_point > 3) {
