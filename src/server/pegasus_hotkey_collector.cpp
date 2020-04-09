@@ -4,6 +4,8 @@
 
 #include "pegasus_hotkey_collector.h"
 
+#include <math.h>
+
 namespace pegasus {
 namespace server {
 
@@ -93,7 +95,7 @@ void hotkey_collector::analyse_data()
     }
 }
 
-void hotkey_collector::capture_coarse_data(std::string data)
+void hotkey_collector::capture_coarse_data(const std::string &data)
 {
     size_t key_hash_val = std::hash(data) % 103;
     _coarse_count[key_hash_val].fetch_add(1, std::memory_order_release);
@@ -117,7 +119,7 @@ const int hotkey_collector::analyse_coarse_data()
     sd = sqrt(sd / 103);
     std::vector<uint> hotkey_hash_bucket;
     for (int i = 0; i < data_sample.size(); i++) {
-        double hot_point = (data_sample[i] - avg) / sd;
+        double hot_point = (data_samples[i] - avg) / sd;
         hot_point = ceil(std::max(hot_point, double(0)));
         if (hot_point > 3) {
             hotkey_hash_bucket.push_back(i);
