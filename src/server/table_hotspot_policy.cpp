@@ -67,7 +67,6 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     }
     auto cluster_name = replication::get_current_cluster_name();
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
-    // How can I get `reply_thread_hash`
     hotkey_detect_request req;
     req.partition = partition_index;
     resolver->call_op(RPC_DETECT_HOTKEY,
