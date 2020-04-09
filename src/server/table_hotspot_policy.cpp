@@ -70,7 +70,8 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
         RPC_DETECT_HOTKEY,
         req,
         nullptr,
-        [](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+        [app_name,
+         partition_index](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
             if (err == ERR_OK) {
                 ::dsn::apps::hotkey_detect_response response;
                 ::dsn::unmarshall(resp, response);
