@@ -42,7 +42,7 @@ void hotkey_collector::capture_fine_data(const std::string &data)
     }
 }
 
-void hotkey_collector::analyse_fine_data()
+bool hotkey_collector::analyse_fine_data()
 {
     for (int i = 0; i < 103; i++) {
         const std::lock_guard<std::mutex> lock(_fine_capture_unit[i].mutex);
@@ -53,7 +53,7 @@ void hotkey_collector::analyse_fine_data()
     }
     if (_fine_count.size() == 0) {
         derror("analyse_fine_data map size = 0");
-        return;
+        return false;
     }
     int count_max = -1;
     std::string count_max_key;
@@ -63,7 +63,8 @@ void hotkey_collector::analyse_fine_data()
             count_max_key = iter->first;
         }
     _fine_result = count_max_key;
-    return;
+    derror("Hotkey result: [%s]", count_max_key);
+    return true;
 }
 
 void hotkey_collector::analyse_data()

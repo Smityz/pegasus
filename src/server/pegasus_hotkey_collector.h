@@ -32,18 +32,14 @@ public:
 
     hotkey_collector() : _collector_status(0), _coarse_result(-1) {}
 
-    void init(::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
+    void init()
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
-            ::dsn::apps::hotkey_detect_response resp;
-            resp.err = dsn::ERR_SERVICE_ALREADY_EXIST;
-            reply(resp);
+            derror("Receive a new RPC_DETECT_HOTKEY, but detecting is on the way now.")
         };
         if (_collector_status.load(std::memory_order_seq_cst) == 0) {
-            ::dsn::apps::hotkey_detect_response resp;
             _timestamp = dsn_now_s();
             _collector_status.store(1, std::memory_order_seq_cst);
-            reply(resp);
         }
     }
 
@@ -82,7 +78,7 @@ private:
     const int analyse_coarse_data();
     void capture_coarse_data(const std::string &data);
     void capture_fine_data(const std::string &data);
-    void analyse_fine_data();
+    bool analyse_fine_data();
 
     std::atomic_uint _coarse_count[103];
     // _collector_status 0:stop 1:coarse 2:fine 3:finish
