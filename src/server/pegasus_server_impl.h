@@ -56,12 +56,9 @@ public:
     virtual void on_scan(const ::dsn::apps::scan_request &args,
                          ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
     virtual void on_clear_scanner(const int64_t &args) override;
+    virtual void on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args) override;
     virtual void
-    on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
-                     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
-    virtual void on_stop_detect_hotkey(
-        const ::dsn::apps::stop_hotkey_detect_request &args,
-        ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply) override;
+    on_stop_detect_hotkey(const ::dsn::apps::stop_hotkey_detect_request &args) override;
 
     // input:
     //  - argc = 0 : re-open the db
