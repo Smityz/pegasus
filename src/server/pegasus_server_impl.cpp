@@ -1734,7 +1734,7 @@ void pegasus_server_impl::on_stop_detect_hotkey(const ::dsn::apps::stop_hotkey_d
     ::dsn::tasking::enqueue_timer(
         LPC_ANALYZE_HOTKEY,
         &_tracker,
-        [this]() { this->_hotkey_collector->analyse_data() },
+        [this]() { this->_hotkey_collector->analyse_data(); },
         _hotkey_analyse);
 
     return ::dsn::ERR_OK;
