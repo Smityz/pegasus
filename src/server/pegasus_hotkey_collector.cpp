@@ -97,7 +97,7 @@ void hotkey_collector::analyse_data()
 
 void hotkey_collector::capture_coarse_data(const std::string &data)
 {
-    size_t key_hash_val = std::hash(data) % 103;
+    size_t key_hash_val = std::hash<std::string>{}(data) % 103;
     _coarse_count[key_hash_val].fetch_add(1, std::memory_order_release);
 }
 
