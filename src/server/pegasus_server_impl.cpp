@@ -585,7 +585,7 @@ int pegasus_server_impl::on_batched_write_requests(int64_t decree,
 {
     dassert(_is_open, "");
     dassert(requests != nullptr, "");
-    _hotkey_collector.capture_data(requests, count);
+    _hotkey_collector->capture_data(requests, count);
 
     return _server_write->on_batched_write_requests(requests, count, decree, timestamp);
 }
@@ -597,7 +597,7 @@ void pegasus_server_impl::on_get(const ::dsn::blob &key,
     _pfc_get_qps->increment();
     uint64_t start_time = dsn_now_ns();
 
-    _hotkey_collector.capture_data(key);
+    _hotkey_collector->capture_data(key);
 
     ::dsn::apps::read_response resp;
     resp.app_id = _gpid.get_app_id();
