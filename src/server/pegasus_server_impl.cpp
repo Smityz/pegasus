@@ -1517,12 +1517,12 @@ void pegasus_server_impl::on_clear_scanner(const int64_t &args) { _context_cache
 
 void pegasus_server_impl::on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args)
 {
-    _hotkey_collector.init();
+    _hotkey_collector->init();
 }
 
 void pegasus_server_impl::on_stop_detect_hotkey(const ::dsn::apps::stop_hotkey_detect_request &args)
 {
-    _hotkey_collector.clear();
+    _hotkey_collector->clear();
 }
 
 ::dsn::error_code pegasus_server_impl::start(int argc, char **argv)
