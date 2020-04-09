@@ -58,9 +58,9 @@ bool hotkey_collector::analyse_fine_data()
     int count_max = -1;
     std::string count_max_key;
     for (const auto &iter : _fine_count)
-        if (iter->second > count_max) {
-            count_max = iter->second;
-            count_max_key = iter->first;
+        if (iter.second > count_max) {
+            count_max = iter.second;
+            count_max_key = iter.first;
         }
     _fine_result = count_max_key;
     derror("Hotkey result: [%s]", count_max_key);
