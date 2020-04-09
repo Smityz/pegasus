@@ -52,8 +52,7 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
 inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
 
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
-                                                   const int partition_index,
-                                                   int time_interval = 0)
+                                                   const int partition_index)
 {
     ddebug("start to notice_replica");
     std::vector<rpc_address> meta_servers;
