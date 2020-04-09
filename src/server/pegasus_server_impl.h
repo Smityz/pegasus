@@ -348,8 +348,6 @@ private:
     std::unique_ptr<capacity_unit_calculator> _cu_calculator;
     std::unique_ptr<pegasus_server_write> _server_write;
 
-    std::unique_ptr<hotkey_collector> _hotkey_collector;
-
     uint32_t _checkpoint_reserve_min_count_in_config;
     uint32_t _checkpoint_reserve_time_seconds_in_config;
     uint32_t _checkpoint_reserve_min_count;
@@ -370,6 +368,8 @@ private:
     std::atomic<int32_t> _partition_version;
 
     dsn::task_tracker _tracker;
+
+    std::unique_ptr<hotkey_collector> _hotkey_collector;
 
     // perf counters
     ::dsn::perf_counter_wrapper _pfc_get_qps;
