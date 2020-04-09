@@ -125,13 +125,10 @@ const int hotkey_collector::analyse_coarse_data()
             hotkey_hash_bucket.push_back(i);
         }
     }
-    if (hotkey_hash_bucket.size() == 0) {
-        return -1;
-    }
     if (hotkey_hash_bucket.size() == 1) {
         return hotkey_hash_bucket.back();
     }
-    if (hotkey_hash_bucket.size() == 2) {
+    if (hotkey_hash_bucket.size() >= 2) {
         derror("Multiple hotkey_hash_bucket is hot in this app, select the hottest one to detect");
         int hottest = -1, hottest_index = -1;
         for (int i = 0; i < hotkey_hash_bucket.size(); i++) {
@@ -142,6 +139,7 @@ const int hotkey_collector::analyse_coarse_data()
         }
         return hottest_index;
     }
+    return -1;
 }
 
 } // namespace server
