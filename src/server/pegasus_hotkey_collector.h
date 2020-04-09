@@ -35,8 +35,8 @@ public:
     void init()
     {
         if (_collector_status.load(std::memory_order_seq_cst) != 0) {
-            derror("Receive a new RPC_DETECT_HOTKEY, but detecting is on the way now.")
-        };
+            derror("Receive a new RPC_DETECT_HOTKEY, but detecting is on the way now.");
+        }
         if (_collector_status.load(std::memory_order_seq_cst) == 0) {
             _timestamp = dsn_now_s();
             _collector_status.store(1, std::memory_order_seq_cst);
