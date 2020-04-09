@@ -10,7 +10,7 @@
 #include <dsn/cpp/rpc_holder.h>
 #include <dsn/cpp/serialization_helper/dsn.layer2_types.h>
 #include <dsn/cpp/message_utils.h>
-#include <rrdb/rrdb.code.definition.h>
+#include <rrdb/rrdb_types.h>
 
 using namespace dsn;
 
@@ -71,7 +71,7 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     hotkey_detect_request req;
     req.partition = partition_index;
     resolver->call_op(RPC_DETECT_HOTKEY,
-                      args,
+                      req,
                       &_tracker,
                       empty_rpc_handler,
                       _hotkey_rpc_interval,
