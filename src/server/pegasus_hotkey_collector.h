@@ -16,7 +16,7 @@ class hotkey_collector
 public:
     void capture_data(const ::dsn::blob &key) { capture_data(key.to_string()); }
 
-    void capture_data(const dsn::message_ex **requests, const int count)
+    void capture_data(dsn::message_ex **requests, const int count)
     {
         if (count == 0) {
             return;
