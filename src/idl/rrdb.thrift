@@ -310,7 +310,7 @@ service rrdb
     scan_response scan(1:scan_request request);
     oneway void clear_scanner(1:i64 context_id);
     
-    hotkey_detect_response start_hotkey_detect(1:hotkey_detect_request request)
-    stop_hotkey_detect_response stop_hotkey_detect(1:stop_hotkey_detect_request request) 
+    hotkey_detect_response start_hotkey_detect()
+    stop_hotkey_detect_response stop_hotkey_detect() 
 }
 
