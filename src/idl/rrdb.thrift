@@ -277,6 +277,21 @@ struct duplicate_response
     2: optional string error_hint;
 }
 
+
+struct hotkey_detect_request {
+}
+
+struct hotkey_detect_response {
+  1: optional i32 err;
+}
+
+struct stop_hotkey_detect_request {
+}
+
+struct stop_hotkey_detect_response {
+  1: optional i32 err;
+}
+
 service rrdb
 {
     update_response put(1:update_request update);
@@ -294,5 +309,8 @@ service rrdb
     scan_response get_scanner(1:get_scanner_request request);
     scan_response scan(1:scan_request request);
     oneway void clear_scanner(1:i64 context_id);
+    
+    hotkey_detect_response start_hotkey_detect()
+    stop_hotkey_detect_response stop_hotkey_detect() 
 }
 

@@ -12,12 +12,12 @@ namespace server {
 struct hotspot_partition_data
 {
     hotspot_partition_data(const row_data &row)
-        : total_qps(row.get_total_qps()),
-          total_cu(row.get_total_cu()),
+        : total_read_qps(row.get_total_read_qps()),
+          total_write_qps(row.get_total_write_qps()),
           partition_name(row.row_name){};
     hotspot_partition_data() {}
-    double total_qps;
-    double total_cu;
+    double total_read_qps;
+    double total_write_qps;
     std::string partition_name;
 };
 

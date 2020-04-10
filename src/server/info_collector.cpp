@@ -4,14 +4,15 @@
 
 #include "info_collector.h"
 
+#include <chrono>
 #include <cstdlib>
+#include <dsn/dist/replication/duplication_common.h>
+#include <dsn/tool-api/group_address.h>
 #include <iomanip>
 #include <vector>
-#include <chrono>
-#include <dsn/tool-api/group_address.h>
-#include <dsn/dist/replication/duplication_common.h>
 
 #include "base/pegasus_const.h"
+#include "hotspot_algo_qps_variance.h"
 #include "result_writer.h"
 
 using namespace ::dsn;
@@ -305,8 +306,6 @@ hotspot_calculator *info_collector::get_hotspot_calculator(const std::string &ap
     std::unique_ptr<hotspot_policy> policy;
     if (_hotspot_detect_algorithm == "hotspot_algo_qps_variance") {
         policy.reset(new hotspot_algo_qps_variance());
-    } else if (_hotspot_detect_algorithm == "hotspot_algo_qps_skew") {
-        policy.reset(new hotspot_algo_qps_skew());
     } else {
         dwarn("hotspot detection is disabled");
         _hotspot_calculator_store[app_name] = nullptr;

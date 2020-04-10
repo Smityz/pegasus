@@ -19,7 +19,11 @@
 #include "pegasus_scan_context.h"
 #include "pegasus_manual_compact_service.h"
 #include "pegasus_write_service.h"
+<<<<<<< HEAD
 #include "range_read_limiter.h"
+=======
+#include "pegasus_hotkey_collector.h"
+>>>>>>> hotspot
 
 namespace pegasus {
 namespace server {
@@ -27,6 +31,7 @@ namespace server {
 class meta_store;
 class capacity_unit_calculator;
 class pegasus_server_write;
+class hotkey_collector;
 
 class pegasus_server_impl : public ::dsn::apps::rrdb_service
 {
@@ -55,6 +60,12 @@ public:
     virtual void on_scan(const ::dsn::apps::scan_request &args,
                          ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
     virtual void on_clear_scanner(const int64_t &args) override;
+    virtual void
+    on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
+                     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
+    virtual void on_stop_detect_hotkey(
+        const ::dsn::apps::stop_hotkey_detect_request &args,
+        ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply) override;
 
     // input:
     //  - argc = 0 : re-open the db
@@ -356,6 +367,7 @@ private:
     pegasus_context_cache _context_cache;
 
     std::chrono::seconds _update_rdb_stat_interval;
+    std::chrono::seconds _hotkey_analyse;
     ::dsn::task_ptr _update_replica_rdb_stat;
     static ::dsn::task_ptr _update_server_rdb_stat;
 
@@ -364,6 +376,8 @@ private:
     std::atomic<int32_t> _partition_version;
 
     dsn::task_tracker _tracker;
+
+    std::unique_ptr<hotkey_collector> _hotkey_collector;
 
     // perf counters
     ::dsn::perf_counter_wrapper _pfc_get_qps;
