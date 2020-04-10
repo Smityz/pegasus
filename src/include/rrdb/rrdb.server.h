@@ -244,13 +244,13 @@ private:
         svc->on_clear_scanner(args);
     }
     static void on_detect_hotkey(rrdb_service *svc,
-                                 hotkey_detect_request &args,
+                                 const hotkey_detect_request &args,
                                  ::dsn::rpc_replier<hotkey_detect_response> &reply)
     {
         svc->on_detect_hotkey(args, reply);
     }
     static void on_stop_detect_hotkey(rrdb_service *svc,
-                                      stop_hotkey_detect_request &args,
+                                      const stop_hotkey_detect_request &args,
                                       ::dsn::rpc_replier<stop_hotkey_detect_response> &reply)
     {
         svc->on_stop_detect_hotkey(args, reply);
