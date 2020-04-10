@@ -66,28 +66,27 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     auto cluster_name = replication::get_current_cluster_name();
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
     ::dsn::apps::hotkey_detect_request req;
-    resolver->call_op(
-        RPC_DETECT_HOTKEY,
-        req,
-        nullptr,
-        [app_name,
-         partition_index](error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
-            if (err == ERR_OK) {
-                ::dsn::apps::hotkey_detect_response response;
-                ::dsn::unmarshall(resp, response);
-                if (response.err == ERR_OK) {
-                    ddebug("detect hotspot rpc sending succeed");
-                    return;
-                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
-                    ddebug("this hotspot rpc has been sending");
-                }
-            } else if (err == ERR_TIMEOUT) {
-                notice_replica(app_name, partition_index);
-            }
-        },
-        std::chrono::seconds(10),
-        partition_index,
-        0);
+    resolver->call_op(RPC_DETECT_HOTKEY,
+                      req,
+                      nullptr,
+                      [app_name, partition_index](
+                          error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+                          if (err == ERR_OK) {
+                              ::dsn::apps::hotkey_detect_response response;
+                              ::dsn::unmarshall(resp, response);
+                              if (response.err == ERR_OK) {
+                                  ddebug("detect hotspot rpc sending succeed");
+                                  return;
+                              } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
+                                  ddebug("this hotspot rpc has been sending");
+                              }
+                          } else if (err == ERR_TIMEOUT) {
+                              notice_replica(app_name, partition_index);
+                          }
+                      },
+                      std::chrono::seconds(10),
+                      partition_index,
+                      0);
 }
 
 void hotspot_calculator::start_alg()
