@@ -20,9 +20,14 @@
 #include "pegasus_manual_compact_service.h"
 #include "pegasus_write_service.h"
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "range_read_limiter.h"
 =======
 #include "pegasus_hotkey_collector.h"
+>>>>>>> hotspot
+=======
+#include "pegasus_hotkey_collector.h"
+#include "range_read_limiter.h"
 >>>>>>> hotspot
 
 namespace pegasus {
