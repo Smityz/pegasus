@@ -331,7 +331,9 @@ private:
     // slow query time threshold. exceed this threshold will be logged.
     uint64_t _slow_query_threshold_ns;
     uint64_t _slow_query_threshold_ns_in_config;
+
     range_read_limiter_options _rng_rd_opts;
+
     std::shared_ptr<KeyWithTTLCompactionFilterFactory> _key_ttl_compaction_filter_factory;
     std::shared_ptr<rocksdb::Statistics> _statistics;
     rocksdb::DBOptions _db_opts;
