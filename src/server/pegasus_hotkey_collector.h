@@ -7,24 +7,35 @@
 #include <dsn/cpp/serverlet.h>
 #include <dsn/utility/error_code.h>
 #include <rrdb/rrdb_types.h>
+#include <gtest/gtest_prod.h>
 
 namespace pegasus {
 namespace server {
 
+enum collector_status_set
+{
+    STOP = 0,
+    COARSE,
+    FINE,
+    FINISH
+};
+
 class hotkey_collector
 {
 public:
-    hotkey_collector() : _collector_status(0), _coarse_result(-1) {}
+    hotkey_collector() : _collector_state(STOP), _coarse_result(-1) {}
 
-    void init()
+    bool init()
     {
-        if (_collector_status.load(std::memory_order_seq_cst) != 0) {
-            derror("Receive a new RPC_DETECT_HOTKEY, but detecting is on the way now.");
+        if (_collector_state.load(std::memory_order_seq_cst) != STOP) {
+            derror(
+                "Receive a new RPC_DETECT_HOTKEY, but detecting is on the way now. Now state is %s",
+                get_status());
+            return false;
         }
-        if (_collector_status.load(std::memory_order_seq_cst) == 0) {
-            _timestamp = dsn_now_s();
-            _collector_status.store(1, std::memory_order_seq_cst);
-        }
+        _timestamp = dsn_now_s();
+        _collector_state.store(COARSE, std::memory_order_seq_cst);
+        return true;
     }
 
     void clear()
@@ -40,12 +51,23 @@ public:
         _coarse_result.store(-1, std::memory_order_seq_cst);
         _fine_result = "";
         _fine_count.clear();
-        _collector_status.store(0, std::memory_order_seq_cst);
+        _collector_state.store(STOP, std::memory_order_seq_cst);
     }
 
     void capture_data(const ::dsn::blob &key);
     void capture_data(dsn::message_ex **requests, const int count);
     void analyse_data();
+    std::string get_status()
+    {
+        collector_status_set status = _collector_state.load(std::memory_order_seq_cst);
+        if (status == STOP)
+            return "STOP";
+        if (status == COARSE)
+            return "COARSE";
+        if (status == FINE)
+            return "FINE";
+        return "FINISH";
+    }
 
 private:
     void capture_data(const std::string &data);
@@ -54,9 +76,8 @@ private:
     const int analyse_coarse_data();
     bool analyse_fine_data();
 
+    std::atomic<collector_status_set> _collector_state;
     std::atomic_uint _coarse_count[103];
-    // _collector_status 0:stop 1:coarse 2:fine 3:finish
-    std::atomic<unsigned short> _collector_status;
     std::atomic<int> _coarse_result;
     struct fine_capture_unit_struct
     {
@@ -67,6 +88,8 @@ private:
     std::unordered_map<std::string, int> _fine_count;
     uint64_t _timestamp;
     const int kMaxTime = 100;
+
+    FRIEND_TEST(hotkey_detect_test, find_hotkey);
 };
 
 } // namespace server

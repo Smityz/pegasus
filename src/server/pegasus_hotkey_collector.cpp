@@ -84,38 +84,38 @@ void hotkey_collector::capture_data(const ::dsn::blob &key) { capture_data(key.t
 
 void hotkey_collector::capture_data(const std::string &data)
 {
-    if (_collector_status.load(std::memory_order_seq_cst) == 0) {
+    if (_collector_state.load(std::memory_order_seq_cst) == STOP) {
         return;
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 1) {
+    if (_collector_state.load(std::memory_order_seq_cst) == COARSE) {
         capture_coarse_data(data);
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 2) {
+    if (_collector_state.load(std::memory_order_seq_cst) == FINE) {
         capture_fine_data(data);
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 3) {
+    if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
         return;
     }
 }
 
 void hotkey_collector::analyse_data()
 {
-    if (_collector_status.load(std::memory_order_seq_cst) == 0) {
+    if (_collector_state.load(std::memory_order_seq_cst) == STOP) {
         return;
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 1) {
+    if (_collector_state.load(std::memory_order_seq_cst) == COARSE) {
         int coarse_result = analyse_coarse_data();
         if (coarse_result != -1) {
-            _collector_status.store(2, std::memory_order_seq_cst);
+            _collector_state.store(FINE, std::memory_order_seq_cst);
             _coarse_result.store(coarse_result, std::memory_order_seq_cst);
         }
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 2) {
+    if (_collector_state.load(std::memory_order_seq_cst) == FINE) {
         if (analyse_fine_data()) {
-            _collector_status.store(3, std::memory_order_seq_cst);
+            _collector_state.store(FINISH, std::memory_order_seq_cst);
         }
     }
-    if (_collector_status.load(std::memory_order_seq_cst) == 3) {
+    if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
         derror("Hotkey result: [%s]", _fine_result);
         clear();
     }
