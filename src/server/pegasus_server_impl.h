@@ -19,7 +19,9 @@
 #include "pegasus_scan_context.h"
 #include "pegasus_manual_compact_service.h"
 #include "pegasus_write_service.h"
-#include "range_read_limiter.h"
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
 #include "pegasus_hotkey_collector.h"
 
 namespace pegasus {
@@ -34,6 +36,89 @@ class pegasus_server_impl : public ::dsn::apps::rrdb_service
 {
 public:
     static void register_service()
+    {
+        replication_app_base::register_storage_engine(
+            "pegasus", replication_app_base::create<pegasus::server::pegasus_server_impl>);
+        register_rpc_handlers();
+    }
+    explicit pegasus_server_impl(dsn::replication::replica *r);
+
+    virtual ~pegasus_server_impl() override;
+
+    // the following methods may set physical error if internal error occurs
+    virtual void on_get(const ::dsn::blob &key,
+                        ::dsn::rpc_replier<::dsn::apps::read_response> &reply) override;
+    virtual void on_multi_get(const ::dsn::apps::multi_get_request &args,
+                              ::dsn::rpc_replier<::dsn::apps::multi_get_response> &reply) override;
+    virtual void on_sortkey_count(const ::dsn::blob &args,
+                                  ::dsn::rpc_replier<::dsn::apps::count_response> &reply) override;
+    virtual void on_ttl(const ::dsn::blob &key,
+                        ::dsn::rpc_replier<::dsn::apps::ttl_response> &reply) override;
+    virtual void on_get_scanner(const ::dsn::apps::get_scanner_request &args,
+                                ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
+    virtual void on_scan(const ::dsn::apps::scan_request &args,
+                         ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
+    virtual void on_clear_scanner(const int64_t &args) override;
+    virtual void
+    on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
+                     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
+    virtual void on_stop_detect_hotkey(
+        const ::dsn::apps::stop_hotkey_detect_request &args,
+        ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply) override;
+
+    // input:
+    //  - argc = 0 : re-open the db
+    //  - argc = 2n + 1, n >= 0; normal open the db
+    // returns:
+    //  - ERR_OK
+    //  - ERR_FILE_OPERATION_FAILED
+    //  - ERR_LOCAL_APP_FAILURE
+    virtual ::dsn::error_code start(int argc, char **argv) override;
+
+    virtual void cancel_background_work(bool wait) override;
+
+    // returns:
+    //  - ERR_OK
+    //  - ERR_FILE_OPERATION_FAILED
+    virtual ::dsn::error_code stop(bool clear_state) override;
+
+    /// Each of the write request (specifically, the rpc that's configured as write, see
+    /// option `rpc_request_is_write_operation` in rDSN `task_spec`) will first be
+    /// replicated to the replicas through the underlying PacificA protocol in rDSN, and
+    /// after being committed, the mutation will be applied into rocksdb by this function.
+    ///
+    /// \see dsn::replication::replication_app_base::apply_mutation
+    /// \inherit dsn::replication::replication_app_base
+    virtual int on_batched_write_requests(int64_t decree,
+                                          uint64_t timestamp,
+                                          dsn::message_ex **requests,
+                                          int count) override;
+
+    virtual ::dsn::error_code prepare_get_checkpoint(dsn::blob &learn_req) override
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> fce26e850d285d6a336c6038d2d809ec92bb2699
+#include "range_read_limiter.h"
+#include "pegasus_hotkey_collector.h"
+
+namespace pegasus {
+namespace server {
+
+<<<<<<< HEAD
+class meta_store;
+class capacity_unit_calculator;
+class pegasus_server_write;
+class hotkey_collector;
+
+class pegasus_server_impl : public ::dsn::apps::rrdb_service
+{
+public:
+    static void register_service()
+=======
+    class pegasus_server_impl : public ::dsn::apps::rrdb_service
+>>>>>>> 4c5508ac3f65a3f12a729b137699ca461858886e
+>>>>>>> fce26e850d285d6a336c6038d2d809ec92bb2699
     {
         replication_app_base::register_storage_engine(
             "pegasus", replication_app_base::create<pegasus::server::pegasus_server_impl>);
@@ -307,6 +392,10 @@ private:
             return true;
         }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> fce26e850d285d6a336c6038d2d809ec92bb2699
         return false;
     }
 
@@ -332,8 +421,11 @@ private:
     uint64_t _slow_query_threshold_ns;
     uint64_t _slow_query_threshold_ns_in_config;
 
+<<<<<<< HEAD
     range_read_limiter_options _rng_rd_opts;
 
+=======
+>>>>>>> fce26e850d285d6a336c6038d2d809ec92bb2699
     std::shared_ptr<KeyWithTTLCompactionFilterFactory> _key_ttl_compaction_filter_factory;
     std::shared_ptr<rocksdb::Statistics> _statistics;
     rocksdb::DBOptions _db_opts;
@@ -404,4 +496,103 @@ private:
 };
 
 } // namespace server
+<<<<<<< HEAD
+=======
+=======
+        ::dsn::error_code check_meta_cf(const std::string &path, bool *need_create_meta_cf);
+
+        void release_db();
+
+        ::dsn::error_code flush_all_family_columns(bool wait);
+
+    private:
+        static const std::string COMPRESSION_HEADER;
+        // Column family names.
+        static const std::string DATA_COLUMN_FAMILY_NAME;
+        static const std::string META_COLUMN_FAMILY_NAME;
+
+        dsn::gpid _gpid;
+        std::string _primary_address;
+        bool _verbose_log;
+        uint64_t _abnormal_get_size_threshold;
+        uint64_t _abnormal_multi_get_size_threshold;
+        uint64_t _abnormal_multi_get_iterate_count_threshold;
+        // slow query time threshold. exceed this threshold will be logged.
+        uint64_t _slow_query_threshold_ns;
+        uint64_t _slow_query_threshold_ns_in_config;
+
+        range_read_limiter_options _rng_rd_opts;
+
+        std::shared_ptr<KeyWithTTLCompactionFilterFactory> _key_ttl_compaction_filter_factory;
+        std::shared_ptr<rocksdb::Statistics> _statistics;
+        rocksdb::DBOptions _db_opts;
+        rocksdb::ColumnFamilyOptions _data_cf_opts;
+        rocksdb::ColumnFamilyOptions _meta_cf_opts;
+        rocksdb::ReadOptions _data_cf_rd_opts;
+        std::string _usage_scenario;
+
+        rocksdb::DB *_db;
+        rocksdb::ColumnFamilyHandle *_data_cf;
+        rocksdb::ColumnFamilyHandle *_meta_cf;
+        static std::shared_ptr<rocksdb::Cache> _s_block_cache;
+        volatile bool _is_open;
+        uint32_t _pegasus_data_version;
+        std::atomic<int64_t> _last_durable_decree;
+
+        std::unique_ptr<meta_store> _meta_store;
+        std::unique_ptr<capacity_unit_calculator> _cu_calculator;
+        std::unique_ptr<pegasus_server_write> _server_write;
+
+        uint32_t _checkpoint_reserve_min_count_in_config;
+        uint32_t _checkpoint_reserve_time_seconds_in_config;
+        uint32_t _checkpoint_reserve_min_count;
+        uint32_t _checkpoint_reserve_time_seconds;
+        std::atomic_bool _is_checkpointing;         // whether the db is doing checkpoint
+        ::dsn::utils::ex_lock_nr _checkpoints_lock; // protected the following checkpoints vector
+        std::deque<int64_t> _checkpoints;           // ordered checkpoints
+
+        pegasus_context_cache _context_cache;
+
+        std::chrono::seconds _update_rdb_stat_interval;
+        std::chrono::seconds _hotkey_analyse;
+        ::dsn::task_ptr _update_replica_rdb_stat;
+        static ::dsn::task_ptr _update_server_rdb_stat;
+
+        pegasus_manual_compact_service _manual_compact_svc;
+
+        std::atomic<int32_t> _partition_version;
+
+        dsn::task_tracker _tracker;
+
+        std::unique_ptr<hotkey_collector> _hotkey_collector;
+
+        // perf counters
+        ::dsn::perf_counter_wrapper _pfc_get_qps;
+        ::dsn::perf_counter_wrapper _pfc_multi_get_qps;
+        ::dsn::perf_counter_wrapper _pfc_scan_qps;
+
+        ::dsn::perf_counter_wrapper _pfc_get_latency;
+        ::dsn::perf_counter_wrapper _pfc_multi_get_latency;
+        ::dsn::perf_counter_wrapper _pfc_scan_latency;
+
+        ::dsn::perf_counter_wrapper _pfc_recent_expire_count;
+        ::dsn::perf_counter_wrapper _pfc_recent_filter_count;
+        ::dsn::perf_counter_wrapper _pfc_recent_abnormal_count;
+
+        // rocksdb internal statistics
+        // server level
+        static ::dsn::perf_counter_wrapper _pfc_rdb_block_cache_mem_usage;
+        // replica level
+        ::dsn::perf_counter_wrapper _pfc_rdb_sst_count;
+        ::dsn::perf_counter_wrapper _pfc_rdb_sst_size;
+        ::dsn::perf_counter_wrapper _pfc_rdb_block_cache_hit_count;
+        ::dsn::perf_counter_wrapper _pfc_rdb_block_cache_total_count;
+        ::dsn::perf_counter_wrapper _pfc_rdb_index_and_filter_blocks_mem_usage;
+        ::dsn::perf_counter_wrapper _pfc_rdb_memtable_mem_usage;
+        ::dsn::perf_counter_wrapper _pfc_rdb_estimate_num_keys;
+    };
+
+    } // namespace server
+>>>>>>> 4c5508ac3f65a3f12a729b137699ca461858886e
+>>>>>>> fce26e850d285d6a336c6038d2d809ec92bb2699
 } // namespace pegasus
