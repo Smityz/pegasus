@@ -63,10 +63,8 @@ TEST(hotkey_detect_test, find_hotkey)
     }
     ASSERT_EQ(collector->get_status(), "STOP");
     collector->clear();
-<<<<<<< HEAD
-    == == == =
 
-                 ASSERT_TRUE(collector->init());
+    ASSERT_TRUE(collector->init());
     ASSERT_EQ(collector->get_status(), "COARSE");
 
     for (int i = 0; i < 1000000; i++) {
@@ -94,7 +92,6 @@ TEST(hotkey_detect_test, find_hotkey)
     }
     ASSERT_EQ(collector->get_status(), "STOP");
     collector->clear();
->>>>>>> hotspot
 }
 
 } // namespace server
