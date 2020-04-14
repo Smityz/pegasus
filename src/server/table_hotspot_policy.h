@@ -51,7 +51,8 @@ public:
                                       true,
                                       "auto detect hot key in the hot paritition");
         if (_hotkey_auto_detect) {
-            _over_threshold_times.resize(partition_num);
+            _over_threshold_times_read.resize(partition_num);
+            _over_threshold_times_write.resize(partition_num);
             kHotPartitionT = (uint32_t)dsn_config_get_value_uint64(
                 "pegasus.collector", "kHotPartitionT", 4, "threshold of hotspot partition value");
             kHotRpcT = (uint32_t)dsn_config_get_value_uint64(
@@ -61,12 +62,14 @@ public:
     void aggregate(const std::vector<row_data> &partitions);
     void start_alg();
     void init_perf_counter(const int perf_counter_count);
-    static void notice_replica(const std::string &app_name, const int partition_num);
+    static void notice_replica(const std::string &app_name,
+                               const int partition_index,
+                               const bool if_read_request);
 
 private:
     const std::string _app_name;
     std::vector<hotpartition_counter> _points;
-    std::vector<int> _over_threshold_times;
+    std::vector<int> _over_threshold_times_read, _over_threshold_times_write;
     std::queue<std::vector<hotspot_partition_data>> _app_data;
     std::unique_ptr<hotspot_policy> _policy;
     bool _hotkey_auto_detect;

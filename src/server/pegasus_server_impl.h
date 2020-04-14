@@ -375,7 +375,7 @@ private:
 
     dsn::task_tracker _tracker;
 
-    std::unique_ptr<hotkey_collector> _hotkey_collector;
+    std::unique_ptr<hotkey_collector> _hotkey_collector_read, _hotkey_collector_write;
 
     // perf counters
     ::dsn::perf_counter_wrapper _pfc_get_qps;

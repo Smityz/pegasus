@@ -5,8 +5,11 @@
 #include <server/pegasus_hotkey_collector.h>
 
 #include "base/pegasus_key_schema.h"
+#include "message_utils.h"
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include <dsn/utility/rand.h>
+#include <dsn/utility/defer.h>
 
 namespace pegasus {
 namespace server {
@@ -60,6 +63,38 @@ TEST(hotkey_detect_test, find_hotkey)
     }
     ASSERT_EQ(collector->get_status(), "STOP");
     collector->clear();
+<<<<<<< HEAD
+    == == == =
+
+                 ASSERT_TRUE(collector->init());
+    ASSERT_EQ(collector->get_status(), "COARSE");
+
+    for (int i = 0; i < 1000000; i++) {
+        dsn::blob key;
+        pegasus_generate_key(key, std::string("hash"), std::string("sort"));
+        dsn::apps::update_request req;
+        req.key = key;
+        req.value.assign("value", 0, 5);
+
+        int put_rpc_cnt = 1;
+        int remove_rpc_cnt = 1;
+        int total_rpc_cnt = put_rpc_cnt + remove_rpc_cnt;
+        auto writes = new dsn::message_ex *[total_rpc_cnt];
+        for (int i = 0; i < put_rpc_cnt; i++) {
+            writes[i] = pegasus::create_put_request(req);
+        }
+        for (int i = put_rpc_cnt; i < total_rpc_cnt; i++) {
+            writes[i] = pegasus::create_remove_request(key);
+        }
+        collector->capture_data(writes, total_rpc_cnt);
+        if (i % 10000 == 0) {
+            collector->analyse_data();
+        }
+        auto cleanup = dsn::defer([=]() { delete[] writes; });
+    }
+    ASSERT_EQ(collector->get_status(), "STOP");
+    collector->clear();
+>>>>>>> hotspot
 }
 
 } // namespace server

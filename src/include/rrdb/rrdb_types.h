@@ -1947,6 +1947,12 @@ inline std::ostream &operator<<(std::ostream &out, const duplicate_response &obj
     return out;
 }
 
+typedef struct _hotkey_detect_request__isset
+{
+    _hotkey_detect_request__isset() : type(false) {}
+    bool type : 1;
+} _hotkey_detect_request__isset;
+
 class hotkey_detect_request
 {
 public:
@@ -1954,11 +1960,21 @@ public:
     hotkey_detect_request(hotkey_detect_request &&);
     hotkey_detect_request &operator=(const hotkey_detect_request &);
     hotkey_detect_request &operator=(hotkey_detect_request &&);
-    hotkey_detect_request() {}
+    hotkey_detect_request() : type(0) {}
 
     virtual ~hotkey_detect_request() throw();
+    bool type;
 
-    bool operator==(const hotkey_detect_request & /* rhs */) const { return true; }
+    _hotkey_detect_request__isset __isset;
+
+    void __set_type(const bool val);
+
+    bool operator==(const hotkey_detect_request &rhs) const
+    {
+        if (!(type == rhs.type))
+            return false;
+        return true;
+    }
     bool operator!=(const hotkey_detect_request &rhs) const { return !(*this == rhs); }
 
     bool operator<(const hotkey_detect_request &) const;
@@ -2025,6 +2041,12 @@ inline std::ostream &operator<<(std::ostream &out, const hotkey_detect_response 
     return out;
 }
 
+typedef struct _stop_hotkey_detect_request__isset
+{
+    _stop_hotkey_detect_request__isset() : type(false) {}
+    bool type : 1;
+} _stop_hotkey_detect_request__isset;
+
 class stop_hotkey_detect_request
 {
 public:
@@ -2032,11 +2054,21 @@ public:
     stop_hotkey_detect_request(stop_hotkey_detect_request &&);
     stop_hotkey_detect_request &operator=(const stop_hotkey_detect_request &);
     stop_hotkey_detect_request &operator=(stop_hotkey_detect_request &&);
-    stop_hotkey_detect_request() {}
+    stop_hotkey_detect_request() : type(0) {}
 
     virtual ~stop_hotkey_detect_request() throw();
+    bool type;
 
-    bool operator==(const stop_hotkey_detect_request & /* rhs */) const { return true; }
+    _stop_hotkey_detect_request__isset __isset;
+
+    void __set_type(const bool val);
+
+    bool operator==(const stop_hotkey_detect_request &rhs) const
+    {
+        if (!(type == rhs.type))
+            return false;
+        return true;
+    }
     bool operator!=(const stop_hotkey_detect_request &rhs) const { return !(*this == rhs); }
 
     bool operator<(const stop_hotkey_detect_request &) const;
@@ -2102,7 +2134,7 @@ inline std::ostream &operator<<(std::ostream &out, const stop_hotkey_detect_resp
     obj.printTo(out);
     return out;
 }
-}
-} // namespace
+} // namespace apps
+} // namespace dsn
 
 #endif

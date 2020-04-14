@@ -279,6 +279,8 @@ struct duplicate_response
 
 
 struct hotkey_detect_request {
+    // true: detect read data, false: detect write data
+    1: bool type 
 }
 
 struct hotkey_detect_response {
@@ -286,6 +288,7 @@ struct hotkey_detect_response {
 }
 
 struct stop_hotkey_detect_request {
+    1: bool type 
 }
 
 struct stop_hotkey_detect_response {

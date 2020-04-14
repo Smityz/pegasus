@@ -3342,8 +3342,8 @@ check_and_mutate_request::check_and_mutate_request(check_and_mutate_request &&ot
     return_check_value = std::move(other99.return_check_value);
     __isset = std::move(other99.__isset);
 }
-check_and_mutate_request &check_and_mutate_request::
-operator=(const check_and_mutate_request &other100)
+check_and_mutate_request &
+check_and_mutate_request::operator=(const check_and_mutate_request &other100)
 {
     hash_key = other100.hash_key;
     check_sort_key = other100.check_sort_key;
@@ -3589,8 +3589,8 @@ check_and_mutate_response::check_and_mutate_response(check_and_mutate_response &
     server = std::move(other103.server);
     __isset = std::move(other103.__isset);
 }
-check_and_mutate_response &check_and_mutate_response::
-operator=(const check_and_mutate_response &other104)
+check_and_mutate_response &
+check_and_mutate_response::operator=(const check_and_mutate_response &other104)
 {
     error = other104.error;
     check_value_returned = other104.check_value_returned;
@@ -3603,8 +3603,8 @@ operator=(const check_and_mutate_response &other104)
     __isset = other104.__isset;
     return *this;
 }
-check_and_mutate_response &check_and_mutate_response::
-operator=(check_and_mutate_response &&other105)
+check_and_mutate_response &
+check_and_mutate_response::operator=(check_and_mutate_response &&other105)
 {
     error = std::move(other105.error);
     check_value_returned = std::move(other105.check_value_returned);
@@ -4594,6 +4594,8 @@ void duplicate_response::printTo(std::ostream &out) const
 
 hotkey_detect_request::~hotkey_detect_request() throw() {}
 
+void hotkey_detect_request::__set_type(const bool val) { this->type = val; }
+
 uint32_t hotkey_detect_request::read(::apache::thrift::protocol::TProtocol *iprot)
 {
 
@@ -4612,7 +4614,19 @@ uint32_t hotkey_detect_request::read(::apache::thrift::protocol::TProtocol *ipro
         if (ftype == ::apache::thrift::protocol::T_STOP) {
             break;
         }
-        xfer += iprot->skip(ftype);
+        switch (fid) {
+        case 1:
+            if (ftype == ::apache::thrift::protocol::T_BOOL) {
+                xfer += iprot->readBool(this->type);
+                this->__isset.type = true;
+            } else {
+                xfer += iprot->skip(ftype);
+            }
+            break;
+        default:
+            xfer += iprot->skip(ftype);
+            break;
+        }
         xfer += iprot->readFieldEnd();
     }
 
@@ -4627,6 +4641,10 @@ uint32_t hotkey_detect_request::write(::apache::thrift::protocol::TProtocol *opr
     apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
     xfer += oprot->writeStructBegin("hotkey_detect_request");
 
+    xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_BOOL, 1);
+    xfer += oprot->writeBool(this->type);
+    xfer += oprot->writeFieldEnd();
+
     xfer += oprot->writeFieldStop();
     xfer += oprot->writeStructEnd();
     return xfer;
@@ -4635,29 +4653,37 @@ uint32_t hotkey_detect_request::write(::apache::thrift::protocol::TProtocol *opr
 void swap(hotkey_detect_request &a, hotkey_detect_request &b)
 {
     using ::std::swap;
-    (void)a;
-    (void)b;
+    swap(a.type, b.type);
+    swap(a.__isset, b.__isset);
 }
 
 hotkey_detect_request::hotkey_detect_request(const hotkey_detect_request &other134)
 {
-    (void)other134;
+    type = other134.type;
+    __isset = other134.__isset;
 }
-hotkey_detect_request::hotkey_detect_request(hotkey_detect_request &&other135) { (void)other135; }
+hotkey_detect_request::hotkey_detect_request(hotkey_detect_request &&other135)
+{
+    type = std::move(other135.type);
+    __isset = std::move(other135.__isset);
+}
 hotkey_detect_request &hotkey_detect_request::operator=(const hotkey_detect_request &other136)
 {
-    (void)other136;
+    type = other136.type;
+    __isset = other136.__isset;
     return *this;
 }
 hotkey_detect_request &hotkey_detect_request::operator=(hotkey_detect_request &&other137)
 {
-    (void)other137;
+    type = std::move(other137.type);
+    __isset = std::move(other137.__isset);
     return *this;
 }
 void hotkey_detect_request::printTo(std::ostream &out) const
 {
     using ::apache::thrift::to_string;
     out << "hotkey_detect_request(";
+    out << "type=" << to_string(type);
     out << ")";
 }
 
@@ -4764,6 +4790,8 @@ void hotkey_detect_response::printTo(std::ostream &out) const
 
 stop_hotkey_detect_request::~stop_hotkey_detect_request() throw() {}
 
+void stop_hotkey_detect_request::__set_type(const bool val) { this->type = val; }
+
 uint32_t stop_hotkey_detect_request::read(::apache::thrift::protocol::TProtocol *iprot)
 {
 
@@ -4782,7 +4810,19 @@ uint32_t stop_hotkey_detect_request::read(::apache::thrift::protocol::TProtocol 
         if (ftype == ::apache::thrift::protocol::T_STOP) {
             break;
         }
-        xfer += iprot->skip(ftype);
+        switch (fid) {
+        case 1:
+            if (ftype == ::apache::thrift::protocol::T_BOOL) {
+                xfer += iprot->readBool(this->type);
+                this->__isset.type = true;
+            } else {
+                xfer += iprot->skip(ftype);
+            }
+            break;
+        default:
+            xfer += iprot->skip(ftype);
+            break;
+        }
         xfer += iprot->readFieldEnd();
     }
 
@@ -4797,6 +4837,10 @@ uint32_t stop_hotkey_detect_request::write(::apache::thrift::protocol::TProtocol
     apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
     xfer += oprot->writeStructBegin("stop_hotkey_detect_request");
 
+    xfer += oprot->writeFieldBegin("type", ::apache::thrift::protocol::T_BOOL, 1);
+    xfer += oprot->writeBool(this->type);
+    xfer += oprot->writeFieldEnd();
+
     xfer += oprot->writeFieldStop();
     xfer += oprot->writeStructEnd();
     return xfer;
@@ -4805,34 +4849,39 @@ uint32_t stop_hotkey_detect_request::write(::apache::thrift::protocol::TProtocol
 void swap(stop_hotkey_detect_request &a, stop_hotkey_detect_request &b)
 {
     using ::std::swap;
-    (void)a;
-    (void)b;
+    swap(a.type, b.type);
+    swap(a.__isset, b.__isset);
 }
 
 stop_hotkey_detect_request::stop_hotkey_detect_request(const stop_hotkey_detect_request &other142)
 {
-    (void)other142;
+    type = other142.type;
+    __isset = other142.__isset;
 }
 stop_hotkey_detect_request::stop_hotkey_detect_request(stop_hotkey_detect_request &&other143)
 {
-    (void)other143;
+    type = std::move(other143.type);
+    __isset = std::move(other143.__isset);
 }
-stop_hotkey_detect_request &stop_hotkey_detect_request::
-operator=(const stop_hotkey_detect_request &other144)
+stop_hotkey_detect_request &
+stop_hotkey_detect_request::operator=(const stop_hotkey_detect_request &other144)
 {
-    (void)other144;
+    type = other144.type;
+    __isset = other144.__isset;
     return *this;
 }
-stop_hotkey_detect_request &stop_hotkey_detect_request::
-operator=(stop_hotkey_detect_request &&other145)
+stop_hotkey_detect_request &
+stop_hotkey_detect_request::operator=(stop_hotkey_detect_request &&other145)
 {
-    (void)other145;
+    type = std::move(other145.type);
+    __isset = std::move(other145.__isset);
     return *this;
 }
 void stop_hotkey_detect_request::printTo(std::ostream &out) const
 {
     using ::apache::thrift::to_string;
     out << "stop_hotkey_detect_request(";
+    out << "type=" << to_string(type);
     out << ")";
 }
 
@@ -4917,15 +4966,15 @@ stop_hotkey_detect_response::stop_hotkey_detect_response(stop_hotkey_detect_resp
     err = std::move(other147.err);
     __isset = std::move(other147.__isset);
 }
-stop_hotkey_detect_response &stop_hotkey_detect_response::
-operator=(const stop_hotkey_detect_response &other148)
+stop_hotkey_detect_response &
+stop_hotkey_detect_response::operator=(const stop_hotkey_detect_response &other148)
 {
     err = other148.err;
     __isset = other148.__isset;
     return *this;
 }
-stop_hotkey_detect_response &stop_hotkey_detect_response::
-operator=(stop_hotkey_detect_response &&other149)
+stop_hotkey_detect_response &
+stop_hotkey_detect_response::operator=(stop_hotkey_detect_response &&other149)
 {
     err = std::move(other149.err);
     __isset = std::move(other149.__isset);
@@ -4939,5 +4988,5 @@ void stop_hotkey_detect_response::printTo(std::ostream &out) const
     (__isset.err ? (out << to_string(err)) : (out << "<null>"));
     out << ")";
 }
-}
-} // namespace
+} // namespace apps
+} // namespace dsn
