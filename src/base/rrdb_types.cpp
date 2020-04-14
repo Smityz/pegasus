@@ -3342,8 +3342,8 @@ check_and_mutate_request::check_and_mutate_request(check_and_mutate_request &&ot
     return_check_value = std::move(other99.return_check_value);
     __isset = std::move(other99.__isset);
 }
-check_and_mutate_request &
-check_and_mutate_request::operator=(const check_and_mutate_request &other100)
+check_and_mutate_request &check_and_mutate_request::
+operator=(const check_and_mutate_request &other100)
 {
     hash_key = other100.hash_key;
     check_sort_key = other100.check_sort_key;
@@ -3589,8 +3589,8 @@ check_and_mutate_response::check_and_mutate_response(check_and_mutate_response &
     server = std::move(other103.server);
     __isset = std::move(other103.__isset);
 }
-check_and_mutate_response &
-check_and_mutate_response::operator=(const check_and_mutate_response &other104)
+check_and_mutate_response &check_and_mutate_response::
+operator=(const check_and_mutate_response &other104)
 {
     error = other104.error;
     check_value_returned = other104.check_value_returned;
@@ -3603,8 +3603,8 @@ check_and_mutate_response::operator=(const check_and_mutate_response &other104)
     __isset = other104.__isset;
     return *this;
 }
-check_and_mutate_response &
-check_and_mutate_response::operator=(check_and_mutate_response &&other105)
+check_and_mutate_response &check_and_mutate_response::
+operator=(check_and_mutate_response &&other105)
 {
     error = std::move(other105.error);
     check_value_returned = std::move(other105.check_value_returned);
@@ -4863,15 +4863,15 @@ stop_hotkey_detect_request::stop_hotkey_detect_request(stop_hotkey_detect_reques
     type = std::move(other143.type);
     __isset = std::move(other143.__isset);
 }
-stop_hotkey_detect_request &
-stop_hotkey_detect_request::operator=(const stop_hotkey_detect_request &other144)
+stop_hotkey_detect_request &stop_hotkey_detect_request::
+operator=(const stop_hotkey_detect_request &other144)
 {
     type = other144.type;
     __isset = other144.__isset;
     return *this;
 }
-stop_hotkey_detect_request &
-stop_hotkey_detect_request::operator=(stop_hotkey_detect_request &&other145)
+stop_hotkey_detect_request &stop_hotkey_detect_request::
+operator=(stop_hotkey_detect_request &&other145)
 {
     type = std::move(other145.type);
     __isset = std::move(other145.__isset);
@@ -4966,15 +4966,15 @@ stop_hotkey_detect_response::stop_hotkey_detect_response(stop_hotkey_detect_resp
     err = std::move(other147.err);
     __isset = std::move(other147.__isset);
 }
-stop_hotkey_detect_response &
-stop_hotkey_detect_response::operator=(const stop_hotkey_detect_response &other148)
+stop_hotkey_detect_response &stop_hotkey_detect_response::
+operator=(const stop_hotkey_detect_response &other148)
 {
     err = other148.err;
     __isset = other148.__isset;
     return *this;
 }
-stop_hotkey_detect_response &
-stop_hotkey_detect_response::operator=(stop_hotkey_detect_response &&other149)
+stop_hotkey_detect_response &stop_hotkey_detect_response::
+operator=(stop_hotkey_detect_response &&other149)
 {
     err = std::move(other149.err);
     __isset = std::move(other149.__isset);
