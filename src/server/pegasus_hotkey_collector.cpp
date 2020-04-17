@@ -139,6 +139,11 @@ void hotkey_collector::capture_str_data(const std::string &data)
 
 void hotkey_collector::analyse_data()
 {
+    std::cout << dsn_now_s() - _timestamp << std::endl;
+    if (dsn_now_s() - _timestamp > kMaxTime) {
+        derror("ERR_NOT_FOUND_HOTKEY");
+        clear();
+    }
     if (_collector_state.load(std::memory_order_seq_cst) == STOP) {
         return;
     }
@@ -157,10 +162,6 @@ void hotkey_collector::analyse_data()
     }
     if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
         return;
-    }
-    if (dsn_now_s() - _timestamp > kMaxTime) {
-        derror("ERR_NOT_FOUND_HOTKEY");
-        clear();
     }
 }
 
