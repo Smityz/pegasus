@@ -8,6 +8,7 @@
 #include <dsn/utility/error_code.h>
 #include <rrdb/rrdb_types.h>
 #include <gtest/gtest_prod.h>
+#include <dsn/utility/ringbuf.h>
 
 namespace pegasus {
 namespace server {
@@ -27,11 +28,12 @@ public:
 
     bool init()
     {
-        if (_collector_state.load(std::memory_order_seq_cst) != STOP) {
-            derror(
-                "Receive a new RPC_DETECT_HOTKEY, but detecting is on the way now. Now state is %s",
-                get_status());
+        if (_collector_state.load(std::memory_order_seq_cst) == COARSE ||
+            _collector_state.load(std::memory_order_seq_cst) == FINE) {
             return false;
+        }
+        if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
+            clear();
         }
         _timestamp = dsn_now_s();
         _collector_state.store(COARSE, std::memory_order_seq_cst);
@@ -54,8 +56,10 @@ public:
         _collector_state.store(STOP, std::memory_order_seq_cst);
     }
 
-    void capture_data(const ::dsn::blob &key);
-    void capture_data(dsn::message_ex **requests, const int count);
+    void capture_blob_data(const ::dsn::blob &key);
+    void capture_msg_data(dsn::message_ex **requests, const int count);
+    void capture_str_data(const std::string &data);
+
     void analyse_data();
     std::string get_status()
     {
@@ -69,19 +73,52 @@ public:
         return "FINISH";
     }
 
+    std::string get_status()
+    {
+        collector_state_set status = _collector_state.load(std::memory_order_seq_cst);
+        if (status == STOP)
+            return "STOP";
+        if (status == COARSE)
+            return "COARSE";
+        if (status == FINE)
+            return "FINE";
+        return "FINISH";
+    }
+
+    bool get_result(std::string &result)
+    {
+        if (_collector_state.load(std::memory_order_seq_cst) != FINISH)
+            return false;
+        result = _fine_result;
+        return true;
+    }
+
+    enum collector_state_set
+    {
+        STOP = 0,
+        COARSE,
+        FINE,
+        FINISH
+    };
+
+    enum collector_rpc_type
+    {
+        READ = 0,
+        WRITE
+    };
+
 private:
-    void capture_data(const std::string &data);
     void capture_coarse_data(const std::string &data);
     void capture_fine_data(const std::string &data);
     const int analyse_coarse_data();
     bool analyse_fine_data();
 
-    std::atomic<collector_status_set> _collector_state;
+    std::atomic<collector_state_set> _collector_state;
     std::atomic_uint _coarse_count[103];
     std::atomic<int> _coarse_result;
     struct fine_capture_unit_struct
     {
-        std::queue<std::string> queue;
+        dsn::utils::ringbuf<std::string, 500> queue;
         std::mutex mutex;
     } _fine_capture_unit[103];
     std::string _fine_result;

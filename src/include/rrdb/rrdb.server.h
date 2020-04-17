@@ -125,11 +125,11 @@ protected:
     }
 
     // RPC_DETECT_HOTKEY
-    virtual void on_detect_hotkey(const hotkey_detect_request &args,
-                                  ::dsn::rpc_replier<hotkey_detect_response> &reply)
+    virtual void on_detect_hotkey(const start_hotkey_detect_request &args,
+                                  ::dsn::rpc_replier<start_hotkey_detect_response> &reply)
     {
         std::cout << "... exec RPC_DETECT_HOTKEY ... (not implemented) " << std::endl;
-        hotkey_detect_response resp;
+        start_hotkey_detect_response resp;
         reply(resp);
     }
 
@@ -243,8 +243,8 @@ private:
         svc->on_clear_scanner(args);
     }
     static void on_detect_hotkey(rrdb_service *svc,
-                                 const hotkey_detect_request &args,
-                                 ::dsn::rpc_replier<hotkey_detect_response> &reply)
+                                 const start_hotkey_detect_request &args,
+                                 ::dsn::rpc_replier<start_hotkey_detect_response> &reply)
     {
         svc->on_detect_hotkey(args, reply);
     }

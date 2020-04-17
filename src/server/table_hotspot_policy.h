@@ -11,14 +11,20 @@
 #include <dsn/dist/replication/duplication_common.h>
 #include <dsn/perf_counter/perf_counter.h>
 #include <gtest/gtest_prod.h>
+#include <dsn/utility/ringbuf.h>
 
 namespace pegasus {
 namespace server {
 
+const int kMaxQueueSize = 100;
+
 struct hotpartition_counter
 {
-    ::dsn::perf_counter_wrapper read_hotpartition_counter, write_hotpartition_counter;
+    ::dsn::perf_counter_wrapper read_hotpartition_counter;
+    ::dsn::perf_counter_wrapper write_hotpartition_counter;
 };
+
+typedef dsn::utils::ringbuf<std::vector<hotspot_partition_data>, kMaxQueueSize> ringbuf;
 
 class hotspot_policy
 {
@@ -27,7 +33,7 @@ public:
     // it uses rolling queue to save one app's data
     // vector is used to save the partitions' data of this app
     // hotspot_partition_data is used to save data of one partition
-    virtual void analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
+    virtual void analysis(const ringbuf &hotspot_app_data,
                           std::vector<hotpartition_counter> &perf_counters) = 0;
 };
 
@@ -44,6 +50,7 @@ public:
           kHotPartitionT(0),
           kHotRpcT(0)
     {
+        ddebug("hotspot_calculator construct!");
         init_perf_counter(partition_num);
         _hotkey_auto_detect =
             dsn_config_get_value_bool("pegasus.collector",
@@ -54,7 +61,7 @@ public:
             _over_threshold_times_read.resize(partition_num);
             _over_threshold_times_write.resize(partition_num);
             kHotPartitionT = (uint32_t)dsn_config_get_value_uint64(
-                "pegasus.collector", "kHotPartitionT", 4, "threshold of hotspot partition value");
+                "pegasus.collector", "kHotPartitionT", 3, "threshold of hotspot partition value");
             kHotRpcT = (uint32_t)dsn_config_get_value_uint64(
                 "pegasus.collector", "kHotRpcT", 1, "threshold of send rpc to detect hotkey");
         }
@@ -70,10 +77,9 @@ private:
     const std::string _app_name;
     std::vector<hotpartition_counter> _points;
     std::vector<int> _over_threshold_times_read, _over_threshold_times_write;
-    std::queue<std::vector<hotspot_partition_data>> _app_data;
+    ringbuf _app_data;
     std::unique_ptr<hotspot_policy> _policy;
     bool _hotkey_auto_detect;
-    const int kMaxQueueSize = 100;
     uint32_t kHotPartitionT, kHotRpcT;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
 };

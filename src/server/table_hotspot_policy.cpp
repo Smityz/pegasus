@@ -9,6 +9,7 @@
 #include <dsn/tool-api/group_address.h>
 #include <dsn/utility/error_code.h>
 #include <rrdb/rrdb_types.h>
+#include "pegasus_hotkey_collector.h"
 
 using namespace dsn;
 
@@ -17,14 +18,11 @@ namespace server {
 
 void hotspot_calculator::aggregate(const std::vector<row_data> &partitions)
 {
-    while (_app_data.size() > kMaxQueueSize - 1) {
-        _app_data.pop();
-    }
     std::vector<hotspot_partition_data> temp(partitions.size());
     for (int i = 0; i < partitions.size(); i++) {
         temp[i] = std::move(hotspot_partition_data(partitions[i]));
     }
-    _app_data.emplace(temp);
+    _app_data.push(std::move(temp));
 }
 
 void hotspot_calculator::init_perf_counter(const int perf_counter_count)
@@ -49,13 +47,14 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     }
 }
 
-inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
-
 /*static*/ void hotspot_calculator::notice_replica(const std::string &app_name,
                                                    const int partition_index,
                                                    const bool if_read_request)
 {
-    ddebug("start to notice_replica, %s.%d", app_name, partition_index);
+    ddebug("start to notice_replica, %s.%d %s",
+           app_name.c_str(),
+           partition_index,
+           if_read_request ? "read_data" : "read_datawrite_data");
     std::vector<rpc_address> meta_servers;
     replica_helper::load_meta_servers(meta_servers);
     rpc_address meta_server;
@@ -66,45 +65,46 @@ inline void empty_rpc_handler(error_code, message_ex *, message_ex *) {}
     }
     auto cluster_name = replication::get_current_cluster_name();
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
-    ::dsn::apps::hotkey_detect_request req;
-    req.type = if_read_request;
-    resolver->call_op(RPC_DETECT_HOTKEY,
-                      req,
-                      nullptr,
-                      [app_name, partition_index, if_read_request](
-                          error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
-                          if (err == ERR_OK) {
-                              ::dsn::apps::hotkey_detect_response response;
-                              ::dsn::unmarshall(resp, response);
-                              if (response.err == ERR_OK) {
-                                  ddebug("detect hotspot rpc sending succeed");
-                                  return;
-                              } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
-                                  ddebug("this hotspot rpc has been sending");
-                              }
-                          } else if (err == ERR_TIMEOUT) {
-                              notice_replica(app_name, partition_index, if_read_request);
-                          }
-                      },
-                      std::chrono::seconds(10),
-                      partition_index,
-                      0);
+    ::dsn::apps::start_hotkey_detect_request req;
+    req.type = if_read_request ? hotkey_collector::READ : hotkey_collector::WRITE;
+    resolver->call_op(
+        RPC_DETECT_HOTKEY,
+        req,
+        nullptr,
+        [app_name, partition_index, if_read_request](
+            error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+            if (err == ERR_OK) {
+                ::dsn::apps::start_hotkey_detect_response response;
+                ::dsn::unmarshall(resp, response);
+                if (response.err == ERR_OK) {
+                    ddebug("detect hotspot rpc sending succeed");
+                    return;
+                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
+                    ddebug("this hotspot rpc has been sending");
+                }
+            } else if (err == ERR_TIMEOUT) {
+                notice_replica(app_name, partition_index, if_read_request);
+            }
+        },
+        std::chrono::seconds(10),
+        partition_index,
+        0);
 }
 
 void hotspot_calculator::start_alg()
 {
-    ddebug("start to start_alg");
+    ddebug("start to detect hotspot partition");
     _policy->analysis(_app_data, _points);
     if (_hotkey_auto_detect) {
         for (int i = 0; i < _points.size(); i++) {
-            if (_points[i].read_hotpartition_counter->get_value() > kHotPartitionT) {
+            if (_points[i].read_hotpartition_counter->get_value() >= kHotPartitionT) {
                 _over_threshold_times_read[i]++;
                 if (_over_threshold_times_read[i] > kHotRpcT) {
                     notice_replica(this->_app_name, i, true);
                     _over_threshold_times_read[i] = 0;
                 }
             }
-            if (_points[i].write_hotpartition_counter->get_value() > kHotPartitionT) {
+            if (_points[i].write_hotpartition_counter->get_value() >= kHotPartitionT) {
                 _over_threshold_times_write[i]++;
                 if (_over_threshold_times_write[i] > kHotRpcT) {
                     notice_replica(this->_app_name, i, false);

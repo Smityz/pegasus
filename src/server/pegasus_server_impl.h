@@ -59,8 +59,8 @@ public:
                          ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
     virtual void on_clear_scanner(const int64_t &args) override;
     virtual void
-    on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
-                     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
+    on_detect_hotkey(const ::dsn::apps::start_hotkey_detect_request &args,
+                     ::dsn::rpc_replier<::dsn::apps::start_hotkey_detect_response> &reply) override;
     virtual void on_stop_detect_hotkey(
         const ::dsn::apps::stop_hotkey_detect_request &args,
         ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply) override;
@@ -365,7 +365,7 @@ private:
     pegasus_context_cache _context_cache;
 
     std::chrono::seconds _update_rdb_stat_interval;
-    std::chrono::seconds _hotkey_analyse;
+    std::chrono::seconds _hotkey_analyse_time_interval;
     ::dsn::task_ptr _update_replica_rdb_stat;
     static ::dsn::task_ptr _update_server_rdb_stat;
 
@@ -375,7 +375,8 @@ private:
 
     dsn::task_tracker _tracker;
 
-    std::unique_ptr<hotkey_collector> _hotkey_collector_read, _hotkey_collector_write;
+    std::unique_ptr<hotkey_collector> _read_hotkey_collector;
+    std::unique_ptr<hotkey_collector> _write_hotkey_collector;
 
     // perf counters
     ::dsn::perf_counter_wrapper _pfc_get_qps;
