@@ -90,7 +90,7 @@ pegasus_restore_key(const ::dsn::blob &key, ::dsn::blob &hash_key, ::dsn::blob &
 
     // hash_key_len is in big endian
     uint16_t hash_key_len = be16toh(*(int16_t *)(key.data()));
-
+    
     if (hash_key_len > 0) {
         dassert(key.length() >= 2 + hash_key_len,
                 "key length must be no less than (2 + hash_key_len)");
