@@ -56,13 +56,21 @@ bool hotkey_collector::analyse_fine_data()
         derror("analyse_fine_data map size = 0");
         return false;
     }
-    int count_max = -1;
+    int count_max = -1, count_min = 10000000;
     std::string count_max_key;
-    for (const auto &iter : _fine_count)
+    for (const auto &iter : _fine_count) {
         if (iter.second > count_max) {
             count_max = iter.second;
             count_max_key = iter.first;
         }
+        if (iter.second < count_min) {
+            count_min = iter.second;
+        }
+    }
+    if (count_max - count_min < 50) {
+        derror("analyse_fine_data failed");
+        return false;
+    }
     _fine_result = count_max_key;
     return true;
 }
@@ -169,10 +177,8 @@ const int hotkey_collector::analyse_coarse_data()
     double total = 0, sd = 0, avg = 0;
     for (int i = 0; i < 103; i++) {
         data_samples.push_back(_coarse_count[i].load(std::memory_order_seq_cst));
-        std::cout << data_samples.back() << std::endl;
         total += data_samples.back();
     }
-    std::cout << "==================" << std::endl;
     if (total < 1000)
         return -1;
     avg = total / 103;

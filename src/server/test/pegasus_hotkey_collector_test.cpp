@@ -35,7 +35,7 @@ std::string hotkey_generator(bool is_hotkey)
 
 TEST(hotkey_detect_test, find_hotkey)
 {
-    srand(1);
+    srand((unsigned)time(NULL));
     std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
 
@@ -51,8 +51,6 @@ TEST(hotkey_detect_test, find_hotkey)
     dsn::blob key;
     for (int i = 0; i < 1000000; i++) {
         std::string hashkey = hotkey_generator(false);
-        if (hashkey == "6mMMMAjsc20jSStT65cU")
-            std::cout << hashkey << std::endl;
         pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
         collector->capture_blob_data(key);
         if (i % 10000 == 0) {
