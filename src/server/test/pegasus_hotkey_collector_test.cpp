@@ -50,7 +50,10 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(collector->get_status(), "COARSE");
     dsn::blob key;
     for (int i = 0; i < 1000000; i++) {
-        pegasus_generate_key(key, hotkey_generator(false), std::string("sortAAAAAAAAAAAAAAAA"));
+        std::string hashkey = hotkey_generator(false);
+        if (hashkey == "6mMMMAjsc20jSStT65cU")
+            std::cout << hashkey << std::endl;
+        pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
         collector->capture_blob_data(key);
         if (i % 10000 == 0) {
             collector->analyse_data();
