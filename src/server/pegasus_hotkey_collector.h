@@ -99,7 +99,7 @@ private:
     std::string _fine_result;
     std::unordered_map<std::string, int> _fine_count;
     uint64_t _timestamp;
-    const int kMaxTime = 100;
+    const int kMaxTime = 20;
 
     FRIEND_TEST(hotkey_detect_test, find_hotkey);
 };

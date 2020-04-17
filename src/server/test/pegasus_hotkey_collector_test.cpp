@@ -36,6 +36,7 @@ std::string hotkey_generator(bool is_hotkey)
 TEST(hotkey_detect_test, find_hotkey)
 {
     srand((unsigned)time(NULL));
+    std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
 
     clock_t time_start = clock();
@@ -51,10 +52,13 @@ TEST(hotkey_detect_test, find_hotkey)
     for (int i = 0; i < 1000000; i++) {
         pegasus_generate_key(key, hotkey_generator(false), std::string("sortAAAAAAAAAAAAAAAA"));
         collector->capture_blob_data(key);
+        if (i % 10000 == 0) {
+            collector->analyse_data();
+        }
     }
-    ASSERT_EQ(collector->get_status(), "COARSE");
-    collector->analyse_data();
-    ASSERT_EQ(collector->get_status(), "COARSE");
+    sleep(20);
+    ASSERT_EQ(collector->get_status(), "STOP");
+    ASSERT_EQ(collector->get_result(result), false);
 
     for (int i = 0; i < 1000000; i++) {
         pegasus_generate_key(key, hotkey_generator(true), std::string("sortAAAAAAAAAAAAAAAA"));
@@ -64,7 +68,6 @@ TEST(hotkey_detect_test, find_hotkey)
         }
     }
     ASSERT_EQ(collector->get_status(), "FINISH");
-    std::string result;
     ASSERT_EQ(collector->get_result(result), true);
     ASSERT_EQ(result, "AAAAAAAAAAAAAAAAAAAA");
 
