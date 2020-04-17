@@ -185,6 +185,7 @@ const int hotkey_collector::analyse_coarse_data()
         double hot_point = (data_samples[i] - avg) / sd;
         hot_point = ceil(std::max(hot_point, double(0)));
         if (hot_point > 3) {
+            std::cout << data_samples[i] << " " << hot_point << std::endl;
             hotkey_hash_bucket.push_back(i);
         }
     }
