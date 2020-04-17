@@ -46,6 +46,12 @@ enum mutate_operation
     MO_DELETE
 }
 
+enum hotkey_type
+{
+    READ,
+    WRITE
+}
+
 struct update_request
 {
     1:dsn.blob      key;
@@ -277,18 +283,17 @@ struct duplicate_response
     2: optional string error_hint;
 }
 
-
-struct hotkey_detect_request {
+struct start_hotkey_detect_request {
     // true: detect read data, false: detect write data
-    1: bool type 
+    1: hotkey_type type 
 }
 
-struct hotkey_detect_response {
-  1: optional i32 err;
+struct start_hotkey_detect_response {
+    1: optional i32 err;
 }
 
 struct stop_hotkey_detect_request {
-    1: bool type 
+    1: hotkey_type type 
 }
 
 struct stop_hotkey_detect_response {
@@ -313,7 +318,7 @@ service rrdb
     scan_response scan(1:scan_request request);
     oneway void clear_scanner(1:i64 context_id);
     
-    hotkey_detect_response start_hotkey_detect()
+    start_hotkey_detect_response start_hotkey_detect()
     stop_hotkey_detect_response stop_hotkey_detect() 
 }
 

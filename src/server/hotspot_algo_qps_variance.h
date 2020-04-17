@@ -18,7 +18,7 @@ namespace server {
 class hotspot_algo_qps_variance : public hotspot_policy
 {
 public:
-    void read_analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
+    void read_analysis(const ringbuf &hotspot_app_data,
                        std::vector<hotpartition_counter> &perf_counters)
     {
         dassert(hotspot_app_data.back().size() == perf_counters.size(),
@@ -60,7 +60,7 @@ public:
         }
     }
 
-    void write_analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
+    void write_analysis(const ringbuf &hotspot_app_data,
                         std::vector<hotpartition_counter> &perf_counters)
     {
         dassert(hotspot_app_data.back().size() == perf_counters.size(),
@@ -102,8 +102,7 @@ public:
         }
     }
 
-    void analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
-                  std::vector<hotpartition_counter> &perf_counters)
+    void analysis(const ringbuf &hotspot_app_data, std::vector<hotpartition_counter> &perf_counters)
     {
         read_analysis(hotspot_app_data, perf_counters);
         write_analysis(hotspot_app_data, perf_counters);

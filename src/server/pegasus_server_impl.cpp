@@ -63,8 +63,8 @@ pegasus_server_impl::pegasus_server_impl(dsn::replication::replica *r)
       _is_checkpointing(false),
       _manual_compact_svc(this),
       _partition_version(0),
-      _hotkey_collector_read(new hotkey_collector()),
-      _hotkey_collector_write(new hotkey_collector())
+      _read_hotkey_collector(new hotkey_collector()),
+      _write_hotkey_collector(new hotkey_collector())
 {
     _primary_address = dsn::rpc_address(dsn_primary_address()).to_string();
     _gpid = get_gpid();
@@ -332,8 +332,11 @@ pegasus_server_impl::pegasus_server_impl(dsn::replication::replica *r)
     _update_rdb_stat_interval = std::chrono::seconds(dsn_config_get_value_uint64(
         "pegasus.server", "update_rdb_stat_interval", 600, "update_rdb_stat_interval, in seconds"));
 
-    _hotkey_analyse = std::chrono::seconds(dsn_config_get_value_uint64(
-        "pegasus.server", "_hotkey_analyse", 5, "_hotkey_analyse, in seconds"));
+    _hotkey_analyse_time_interval = std::chrono::seconds(
+        dsn_config_get_value_uint64("pegasus.server",
+                                    "_hotkey_analyse_time_interval",
+                                    5,
+                                    "time interval of analysing the capturing data, in seconds"));
 
     // TODO: move the qps/latency counters and it's statistics to replication_app_base layer
     std::string str_gpid = _gpid.to_string();
@@ -618,7 +621,7 @@ int pegasus_server_impl::on_batched_write_requests(int64_t decree,
 {
     dassert(_is_open, "");
     dassert(requests != nullptr, "");
-    _hotkey_collector_write->capture_data(requests, count);
+    _write_hotkey_collector->capture_msg_data(requests, count);
 
     return _server_write->on_batched_write_requests(requests, count, decree, timestamp);
 }
@@ -630,7 +633,7 @@ void pegasus_server_impl::on_get(const ::dsn::blob &key,
     _pfc_get_qps->increment();
     uint64_t start_time = dsn_now_ns();
 
-    _hotkey_collector_read->capture_data(key);
+    _read_hotkey_collector->capture_blob_data(key);
 
     ::dsn::apps::read_response resp;
     resp.app_id = _gpid.get_app_id();
@@ -1000,6 +1003,7 @@ void pegasus_server_impl::on_multi_get(const ::dsn::apps::multi_get_request &req
         for (int i = 0; i < keys.size(); i++) {
             rocksdb::Status &status = statuses[i];
             std::string &value = values[i];
+            _read_hotkey_collector->capture_blob_data(request.hash_key);
             // print log
             if (!status.ok()) {
                 if (_verbose_log) {
@@ -1631,22 +1635,30 @@ void pegasus_server_impl::on_scan(const ::dsn::apps::scan_request &request,
 void pegasus_server_impl::on_clear_scanner(const int64_t &args) { _context_cache.fetch(args); }
 
 void pegasus_server_impl::on_detect_hotkey(
-    const ::dsn::apps::hotkey_detect_request &args,
-    ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
+    const ::dsn::apps::start_hotkey_detect_request &args,
+    ::dsn::rpc_replier<::dsn::apps::start_hotkey_detect_response> &reply)
 {
-    if (args.type == 0) {
-        ::dsn::apps::hotkey_detect_response resp;
-        if (_hotkey_collector_read->init()) {
+    if (args.type == hotkey_collector::READ) {
+        ::dsn::apps::start_hotkey_detect_response resp;
+        if (_read_hotkey_collector->init()) {
+            ddebug("%s: is starting to detect read hotkey", replica_name());
             resp.err = ::dsn::ERR_OK;
-        } else {
+        } else if (args.type == hotkey_collector::WRITE) {
+            ddebug("%s: has been detecting read hotkey, now state is %s",
+                   replica_name(),
+                   _read_hotkey_collector->get_status().c_str());
             resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
         }
         reply(resp);
     } else {
-        ::dsn::apps::hotkey_detect_response resp;
-        if (_hotkey_collector_write->init()) {
+        ::dsn::apps::start_hotkey_detect_response resp;
+        if (_write_hotkey_collector->init()) {
+            ddebug("%s: is starting to detect write hotkey", replica_name());
             resp.err = ::dsn::ERR_OK;
         } else {
+            ddebug("%s: has been detecting write hotkey, now state is %s",
+                   replica_name(),
+                   _read_hotkey_collector->get_status().c_str());
             resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
         }
         reply(resp);
@@ -1658,12 +1670,12 @@ void pegasus_server_impl::on_stop_detect_hotkey(
     ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply)
 {
     if (args.type == 0) {
-        _hotkey_collector_read->clear();
+        _read_hotkey_collector->clear();
         ::dsn::apps::stop_hotkey_detect_response resp;
         resp.err = ::dsn::ERR_OK;
         reply(resp);
     } else {
-        _hotkey_collector_write->clear();
+        _write_hotkey_collector->clear();
         ::dsn::apps::stop_hotkey_detect_response resp;
         resp.err = ::dsn::ERR_OK;
         reply(resp);
@@ -1754,6 +1766,7 @@ void pegasus_server_impl::on_stop_detect_hotkey(
                            restore_dir.c_str());
                     return ::dsn::ERR_FILE_OPERATION_FAILED;
                 } else {
+                    db_exist = false;
                     dwarn("%s: try to restore and restore_dir(%s) isn't exist, but we don't "
                           "force "
                           "it, the role of this replica must not primary, so we open a new db "
@@ -1853,12 +1866,21 @@ void pegasus_server_impl::on_stop_detect_hotkey(
     // set default usage scenario after db opened.
     set_usage_scenario(ROCKSDB_ENV_USAGE_SCENARIO_NORMAL);
 
+<<<<<<< HEAD
     dinfo("%s: start the update rocksdb statistics timer task", replica_name());
     _update_replica_rdb_stat =
         ::dsn::tasking::enqueue_timer(LPC_REPLICATION_LONG_COMMON,
                                       &_tracker,
                                       [this]() { this->update_replica_rocksdb_statistics(); },
                                       _update_rdb_stat_interval);
+=======
+    dinfo_replica("start the update rocksdb statistics timer task");
+    _update_replica_rdb_stat =
+        ::dsn::tasking::enqueue_timer(LPC_REPLICATION_LONG_COMMON,
+                                      &_tracker,
+                                      [this]() { this->update_replica_rocksdb_statistics(); },
+                                      _update_rdb_stat_interval);
+>>>>>>> aa83becae2b68ea869f97b58fa737c695266db3f
 
     // Block cache is a singleton on this server shared by all replicas, its metrics update
     // task should be scheduled once an interval on the server view.
@@ -1876,6 +1898,7 @@ void pegasus_server_impl::on_stop_detect_hotkey(
     _cu_calculator = dsn::make_unique<capacity_unit_calculator>(this);
     _server_write = dsn::make_unique<pegasus_server_write>(this, _verbose_log);
 
+<<<<<<< HEAD
     ::dsn::tasking::enqueue_timer(LPC_ANALYZE_HOTKEY,
                                   &_tracker,
                                   [this]() { this->_hotkey_collector_read->analyse_data(); },
@@ -1885,6 +1908,17 @@ void pegasus_server_impl::on_stop_detect_hotkey(
                                   &_tracker,
                                   [this]() { this->_hotkey_collector_write->analyse_data(); },
                                   _hotkey_analyse);
+=======
+    ::dsn::tasking::enqueue_timer(LPC_ANALYZE_HOTKEY,
+                                  &_tracker,
+                                  [this]() { this->_read_hotkey_collector->analyse_data(); },
+                                  _hotkey_analyse_time_interval);
+
+    ::dsn::tasking::enqueue_timer(LPC_ANALYZE_HOTKEY,
+                                  &_tracker,
+                                  [this]() { this->_write_hotkey_collector->analyse_data(); },
+                                  _hotkey_analyse_time_interval);
+>>>>>>> aa83becae2b68ea869f97b58fa737c695266db3f
 
     return ::dsn::ERR_OK;
 }
@@ -2387,6 +2421,9 @@ int pegasus_server_impl::append_key_value_for_scan(
 
     // extract raw key
     ::dsn::blob raw_key(key.data(), 0, key.size());
+
+    _read_hotkey_collector->capture_blob_data(raw_key);
+
     if (hash_key_filter_type != ::dsn::apps::filter_type::FT_NO_FILTER ||
         sort_key_filter_type != ::dsn::apps::filter_type::FT_NO_FILTER) {
         ::dsn::blob hash_key, sort_key;

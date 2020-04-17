@@ -48,7 +48,7 @@ TEST(hotkey_detect_test, find_hotkey)
     dsn::blob key;
     for (int i = 0; i < 1000000; i++) {
         pegasus_generate_key(key, hotkey_generator(false), std::string("sort"));
-        collector->capture_data(key);
+        collector->capture_blob_data(key);
     }
     ASSERT_EQ(collector->get_status(), "COARSE");
     collector->analyse_data();
@@ -56,26 +56,28 @@ TEST(hotkey_detect_test, find_hotkey)
 
     for (int i = 0; i < 1000000; i++) {
         pegasus_generate_key(key, hotkey_generator(true), std::string("sort"));
-        collector->capture_data(key);
+        collector->capture_blob_data(key);
         if (i % 10000 == 0) {
             collector->analyse_data();
         }
     }
-    ASSERT_EQ(collector->get_status(), "STOP");
-    collector->clear();
+    ASSERT_EQ(collector->get_status(), "FINISH");
+    std::string result;
+    ASSERT_EQ(collector->get_result(result), true);
+    ASSERT_EQ(result, "AAAAAAAAAA");
 
     ASSERT_TRUE(collector->init());
     ASSERT_EQ(collector->get_status(), "COARSE");
 
-    for (int i = 0; i < 1000000; i++) {
+    for (int i = 0; i < 100000; i++) {
         dsn::blob key;
         pegasus_generate_key(key, std::string("hash"), std::string("sort"));
         dsn::apps::update_request req;
         req.key = key;
         req.value.assign("value", 0, 5);
 
-        int put_rpc_cnt = 1;
-        int remove_rpc_cnt = 1;
+        int put_rpc_cnt = dsn::rand::next_u32(1, 10);
+        int remove_rpc_cnt = dsn::rand::next_u32(1, 10);
         int total_rpc_cnt = put_rpc_cnt + remove_rpc_cnt;
         auto writes = new dsn::message_ex *[total_rpc_cnt];
         for (int i = 0; i < put_rpc_cnt; i++) {
@@ -84,14 +86,17 @@ TEST(hotkey_detect_test, find_hotkey)
         for (int i = put_rpc_cnt; i < total_rpc_cnt; i++) {
             writes[i] = pegasus::create_remove_request(key);
         }
-        collector->capture_data(writes, total_rpc_cnt);
+        auto cleanup = dsn::defer([=]() { delete[] writes; });
+        collector->capture_msg_data(writes, total_rpc_cnt);
         if (i % 10000 == 0) {
             collector->analyse_data();
         }
-        auto cleanup = dsn::defer([=]() { delete[] writes; });
     }
-    ASSERT_EQ(collector->get_status(), "STOP");
+    ASSERT_EQ(collector->get_status(), "FINISH");
+    ASSERT_EQ(collector->get_result(result), true);
+    ASSERT_EQ(result, "hash");
     collector->clear();
+    ASSERT_EQ(collector->get_status(), "STOP");
 }
 
 } // namespace server

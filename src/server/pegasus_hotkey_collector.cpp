@@ -4,6 +4,8 @@
 
 #include "pegasus_hotkey_collector.h"
 
+#include "base/pegasus_key_schema.h"
+#include "base/pegasus_rpc_types.h"
 #include <math.h>
 
 namespace pegasus {
@@ -37,10 +39,7 @@ void hotkey_collector::capture_fine_data(const std::string &data)
     unsigned long index = rand_int() % 103;
     std::unique_lock<std::mutex> lck(_fine_capture_unit[index].mutex, std::defer_lock);
     if (lck.try_lock()) {
-        _fine_capture_unit[index].queue.emplace(data);
-        while (_fine_capture_unit[index].queue.size() > 1000) {
-            _fine_capture_unit[index].queue.pop();
-        }
+        _fine_capture_unit[index].queue.push(std::move(data));
     }
 }
 
@@ -68,23 +67,55 @@ bool hotkey_collector::analyse_fine_data()
     return true;
 }
 
-void hotkey_collector::capture_data(dsn::message_ex **requests, const int count)
+void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int count)
 {
-    if (count == 0) {
+    if (_collector_state.load(std::memory_order_seq_cst) == STOP || count == 0) {
         return;
     }
     for (int i = 0; i < count; i++) {
-        if (requests[i] == nullptr)
-            continue;
-        capture_data(requests[i]->buffers[1].to_string());
+        ::dsn::blob key;
+        if (requests[i] != nullptr && requests[i]->buffers.size() >= 2) {
+            dsn::task_code rpc_code(requests[0]->rpc_code());
+            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
+                auto rpc = multi_put_rpc::auto_reply(requests[0]);
+                key = rpc.request().hash_key;
+            }
+            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_INCR) {
+                auto rpc = incr_rpc::auto_reply(requests[0]);
+                key = rpc.request().key;
+            }
+            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_CHECK_AND_SET) {
+                auto rpc = check_and_set_rpc::auto_reply(requests[0]);
+                key = rpc.request().hash_key;
+            }
+            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_CHECK_AND_MUTATE) {
+                auto rpc = check_and_mutate_rpc::auto_reply(requests[0]);
+                key = rpc.request().hash_key;
+            }
+            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_PUT) {
+                auto rpc = put_rpc::auto_reply(requests[i]);
+                key = rpc.request().key;
+            }
+            if (key.length() < 2)
+                return;
+            capture_blob_data(key);
+        }
     }
 }
 
-void hotkey_collector::capture_data(const ::dsn::blob &key) { capture_data(key.to_string()); }
-
-void hotkey_collector::capture_data(const std::string &data)
+void hotkey_collector::capture_blob_data(const ::dsn::blob &key)
 {
     if (_collector_state.load(std::memory_order_seq_cst) == STOP) {
+        return;
+    }
+    std::string hash_key, soft_key;
+    pegasus_restore_key(key, hash_key, soft_key);
+    capture_str_data(hash_key);
+}
+
+void hotkey_collector::capture_str_data(const std::string &data)
+{
+    if (_collector_state.load(std::memory_order_seq_cst) == STOP || data.length() == 0) {
         return;
     }
     if (_collector_state.load(std::memory_order_seq_cst) == COARSE) {
@@ -112,12 +143,12 @@ void hotkey_collector::analyse_data()
     }
     if (_collector_state.load(std::memory_order_seq_cst) == FINE) {
         if (analyse_fine_data()) {
+            derror("Hotkey result: [%s]", _fine_result.c_str());
             _collector_state.store(FINISH, std::memory_order_seq_cst);
         }
     }
     if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
-        derror("Hotkey result: [%s]", _fine_result);
-        clear();
+        return;
     }
     if (dsn_now_s() - _timestamp > kMaxTime) {
         derror("ERR_NOT_FOUND_HOTKEY");
@@ -128,7 +159,7 @@ void hotkey_collector::analyse_data()
 void hotkey_collector::capture_coarse_data(const std::string &data)
 {
     size_t key_hash_val = std::hash<std::string>{}(data) % 103;
-    _coarse_count[key_hash_val].fetch_add(1, std::memory_order_release);
+    ++_coarse_count[key_hash_val];
 }
 
 const int hotkey_collector::analyse_coarse_data()
