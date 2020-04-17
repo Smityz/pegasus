@@ -187,12 +187,12 @@ const int hotkey_collector::analyse_coarse_data()
         }
     }
     if (hotkey_hash_bucket.size() == 1) {
-        cout << "hotkey_hash_bucket.size() == 1" << std::endl;
+        std::cout << "hotkey_hash_bucket.size() == 1" << std::endl;
         return hotkey_hash_bucket.back();
     }
     if (hotkey_hash_bucket.size() >= 2) {
         derror("Multiple hotkey_hash_bucket is hot in this app, select the hottest one to detect");
-        cout << "hotkey_hash_bucket.size() >= 2" << std::endl;
+        std::cout << "hotkey_hash_bucket.size() >= 2" << std::endl;
         int hottest = -1, hottest_index = -1;
         for (int i = 0; i < hotkey_hash_bucket.size(); i++) {
             if (hottest < hotkey_hash_bucket[i]) {
