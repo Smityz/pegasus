@@ -71,7 +71,7 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_TRUE(collector->init());
     ASSERT_EQ(collector->get_status(), "COARSE");
 
-    for (int i = 0; i < 1000000; i++) {
+    for (int i = 0; i < 100000; i++) {
         dsn::blob key;
         pegasus_generate_key(
             key, std::string("hashAAAAAAAAAAAAAAAA"), std::string("sortAAAAAAAAAAAAAAAA"));
