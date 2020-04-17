@@ -1640,19 +1640,19 @@ void pegasus_server_impl::on_start_detect_hotkey(
     const ::dsn::apps::start_hotkey_detect_request &args,
     ::dsn::rpc_replier<::dsn::apps::start_hotkey_detect_response> &reply)
 {
-    if (args.type == dsn::apps::start_hotkey_detect_request::hotkey_type::READ) {
+    if (args.type == dsn::apps::hotkey_type::READ) {
         ::dsn::apps::start_hotkey_detect_response resp;
         if (_read_hotkey_collector->init()) {
             ddebug("%s: is starting to detect read hotkey", replica_name());
             resp.err = ::dsn::ERR_OK;
-        } else if (args.type == hotkey_collector::WRITE) {
+        } else {
             ddebug("%s: has been detecting read hotkey, now state is %s",
                    replica_name(),
                    _read_hotkey_collector->get_status().c_str());
             resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
         }
         reply(resp);
-    } else if (args.type == dsn::apps::start_hotkey_detect_request::hotkey_type::WRITE) {
+    } else if (args.type == dsn::apps::hotkey_type::WRITE) {
         ::dsn::apps::start_hotkey_detect_response resp;
         if (_write_hotkey_collector->init()) {
             ddebug("%s: is starting to detect write hotkey", replica_name());
@@ -1671,12 +1671,12 @@ void pegasus_server_impl::on_stop_detect_hotkey(
     const ::dsn::apps::stop_hotkey_detect_request &args,
     ::dsn::rpc_replier<::dsn::apps::stop_hotkey_detect_response> &reply)
 {
-    if (args.type == dsn::apps::start_hotkey_detect_request::hotkey_type::READ) {
+    if (args.type == dsn::apps::hotkey_type::READ) {
         _read_hotkey_collector->clear();
         ::dsn::apps::stop_hotkey_detect_response resp;
         resp.err = ::dsn::ERR_OK;
         reply(resp);
-    } else if (args.type == dsn::apps::start_hotkey_detect_request::hotkey_type::WRITE) {
+    } else if (args.type == dsn::apps::hotkey_type::WRITE) {
         _write_hotkey_collector->clear();
         ::dsn::apps::stop_hotkey_detect_response resp;
         resp.err = ::dsn::ERR_OK;
