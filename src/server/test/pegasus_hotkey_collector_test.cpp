@@ -19,13 +19,13 @@ int position = 0;
 std::string hotkey_generator(bool is_hotkey)
 {
     if (is_hotkey && rand() % 2) {
-        return "AAAAAAAAAA";
+        return "AAAAAAAAAAAAAAAAAAAA";
     } else {
         const char CCH[] = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
         const int len = strlen(CCH);
         std::string result = "";
         int index;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             index = rand() % len;
             result += CCH[index];
         }
@@ -47,7 +47,7 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(collector->get_status(), "COARSE");
     dsn::blob key;
     for (int i = 0; i < 1000000; i++) {
-        pegasus_generate_key(key, hotkey_generator(false), std::string("sort"));
+        pegasus_generate_key(key, hotkey_generator(false), std::string("sortAAAAAAAAAAAAAAAA"));
         collector->capture_blob_data(key);
     }
     ASSERT_EQ(collector->get_status(), "COARSE");
@@ -55,7 +55,7 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(collector->get_status(), "COARSE");
 
     for (int i = 0; i < 1000000; i++) {
-        pegasus_generate_key(key, hotkey_generator(true), std::string("sort"));
+        pegasus_generate_key(key, hotkey_generator(true), std::string("sortAAAAAAAAAAAAAAAA"));
         collector->capture_blob_data(key);
         if (i % 10000 == 0) {
             collector->analyse_data();
@@ -64,14 +64,15 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(collector->get_status(), "FINISH");
     std::string result;
     ASSERT_EQ(collector->get_result(result), true);
-    ASSERT_EQ(result, "AAAAAAAAAA");
+    ASSERT_EQ(result, "AAAAAAAAAAAAAAAAAAAA");
 
     ASSERT_TRUE(collector->init());
     ASSERT_EQ(collector->get_status(), "COARSE");
 
     for (int i = 0; i < 100000; i++) {
         dsn::blob key;
-        pegasus_generate_key(key, std::string("hash"), std::string("sort"));
+        pegasus_generate_key(
+            key, std::string("hashAAAAAAAAAAAAAAAA"), std::string("sortAAAAAAAAAAAAAAAA"));
         dsn::apps::update_request req;
         req.key = key;
         req.value.assign("value", 0, 5);
@@ -94,7 +95,7 @@ TEST(hotkey_detect_test, find_hotkey)
     }
     ASSERT_EQ(collector->get_status(), "FINISH");
     ASSERT_EQ(collector->get_result(result), true);
-    ASSERT_EQ(result, "hash");
+    ASSERT_EQ(result, "hashAAAAAAAAAAAAAAAA");
     collector->clear();
     ASSERT_EQ(collector->get_status(), "STOP");
 }
