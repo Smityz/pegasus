@@ -35,7 +35,7 @@ std::string hotkey_generator(bool is_hotkey)
 
 TEST(hotkey_detect_test, find_hotkey)
 {
-    srand((unsigned)time(NULL));
+    srand(1);
     std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
 
@@ -56,6 +56,7 @@ TEST(hotkey_detect_test, find_hotkey)
             collector->analyse_data();
         }
     }
+    ASSERT_EQ(collector->get_result(result), false);
     sleep(20);
     ASSERT_EQ(collector->get_status(), "STOP");
     ASSERT_EQ(collector->get_result(result), false);
