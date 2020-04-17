@@ -139,8 +139,9 @@ void hotkey_collector::capture_str_data(const std::string &data)
 
 void hotkey_collector::analyse_data()
 {
-    std::cout << dsn_now_s() - _timestamp << " " << kMaxTime << std::endl;
-    if (dsn_now_s() - _timestamp > kMaxTime) {
+    std::cout << (clock() - _timestamp) / (double)CLOCKS_PER_SEC << " " << kMaxTime_sec
+              << std::endl;
+    if ((clock() - _timestamp) / (double)CLOCKS_PER_SEC > kMaxTime_sec) {
         derror("ERR_NOT_FOUND_HOTKEY");
         clear();
     }

@@ -27,7 +27,7 @@ public:
         if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
             clear();
         }
-        _timestamp = dsn_now_s();
+        _timestamp = clock();
         _collector_state.store(COARSE, std::memory_order_seq_cst);
         return true;
     }
@@ -98,8 +98,8 @@ private:
     } _fine_capture_unit[103];
     std::string _fine_result;
     std::unordered_map<std::string, int> _fine_count;
-    uint64_t _timestamp;
-    const int kMaxTime = 20;
+    clock_t _timestamp;
+    const int kMaxTime_sec = 20;
 
     FRIEND_TEST(hotkey_detect_test, find_hotkey);
 };
