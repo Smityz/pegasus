@@ -56,7 +56,9 @@ TEST(hotkey_detect_test, find_hotkey)
             collector->analyse_data();
         }
     }
-    ASSERT_EQ(collector->get_result(result), false);
+    if (collector->get_result(result)) {
+        std::cout << result << std::endl;
+    }
     sleep(20);
     ASSERT_EQ(collector->get_status(), "STOP");
     ASSERT_EQ(collector->get_result(result), false);
