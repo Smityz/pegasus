@@ -61,17 +61,6 @@ public:
     void capture_str_data(const std::string &data);
 
     void analyse_data();
-    std::string get_status()
-    {
-        collector_status_set status = _collector_state.load(std::memory_order_seq_cst);
-        if (status == STOP)
-            return "STOP";
-        if (status == COARSE)
-            return "COARSE";
-        if (status == FINE)
-            return "FINE";
-        return "FINISH";
-    }
 
     std::string get_status()
     {
