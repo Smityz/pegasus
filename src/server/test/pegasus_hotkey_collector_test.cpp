@@ -102,7 +102,8 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(collector->get_status(), "STOP");
 
     clock_t time_end = clock();
-    cout << "time use:" << 1000 * (time_end - time_start) / (double)CLOCKS_PER_SEC << "ms" << endl;
+    std::cout << "time use:" << 1000 * (time_end - time_start) / (double)CLOCKS_PER_SEC << "ms"
+              << std::endl;
 }
 
 } // namespace server
