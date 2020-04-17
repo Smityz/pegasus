@@ -13,14 +13,6 @@
 namespace pegasus {
 namespace server {
 
-enum collector_status_set
-{
-    STOP = 0,
-    COARSE,
-    FINE,
-    FINISH
-};
-
 class hotkey_collector
 {
 public:
@@ -88,12 +80,6 @@ public:
         COARSE,
         FINE,
         FINISH
-    };
-
-    enum collector_rpc_type
-    {
-        READ = 0,
-        WRITE
     };
 
 private:
