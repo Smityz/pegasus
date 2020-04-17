@@ -58,6 +58,7 @@ TEST(hotkey_detect_test, find_hotkey)
         }
     }
     sleep(20);
+    collector->analyse_data();
     ASSERT_EQ(collector->get_status(), "STOP");
     ASSERT_EQ(collector->get_result(result), false);
 
