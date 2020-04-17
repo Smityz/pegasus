@@ -35,8 +35,10 @@ std::string hotkey_generator(bool is_hotkey)
 
 TEST(hotkey_detect_test, find_hotkey)
 {
-    srand(1);
+    srand((unsigned)time(NULL));
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
+
+    clock_t time_start = clock();
 
     // test hotkey_collector::init()
     ASSERT_EQ(collector->get_status(), "STOP");
@@ -69,7 +71,7 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_TRUE(collector->init());
     ASSERT_EQ(collector->get_status(), "COARSE");
 
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 1000000; i++) {
         dsn::blob key;
         pegasus_generate_key(
             key, std::string("hashAAAAAAAAAAAAAAAA"), std::string("sortAAAAAAAAAAAAAAAA"));
@@ -98,6 +100,9 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(result, "hashAAAAAAAAAAAAAAAA");
     collector->clear();
     ASSERT_EQ(collector->get_status(), "STOP");
+
+    clock_t time_end = clock();
+    cout << "time use:" << 1000 * (time_end - time_start) / (double)CLOCKS_PER_SEC << "ms" << endl;
 }
 
 } // namespace server
