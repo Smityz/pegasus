@@ -169,6 +169,8 @@ const int hotkey_collector::analyse_coarse_data()
     double total = 0, sd = 0, avg = 0;
     for (int i = 0; i < 103; i++) {
         data_samples.push_back(_coarse_count[i].load(std::memory_order_seq_cst));
+        std::cout << "_coarse_count[i].load(std::memory_order_seq_cst)"
+                  << _coarse_count[i].load(std::memory_order_seq_cst) << std::endl;
         total += data_samples.back();
     }
     if (total < 1000)
@@ -187,12 +189,10 @@ const int hotkey_collector::analyse_coarse_data()
         }
     }
     if (hotkey_hash_bucket.size() == 1) {
-        std::cout << "hotkey_hash_bucket.size() == 1" << std::endl;
         return hotkey_hash_bucket.back();
     }
     if (hotkey_hash_bucket.size() >= 2) {
         derror("Multiple hotkey_hash_bucket is hot in this app, select the hottest one to detect");
-        std::cout << "hotkey_hash_bucket.size() >= 2" << std::endl;
         int hottest = -1, hottest_index = -1;
         for (int i = 0; i < hotkey_hash_bucket.size(); i++) {
             if (hottest < hotkey_hash_bucket[i]) {
