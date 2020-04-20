@@ -38,6 +38,7 @@ TEST(hotkey_detect_test, find_hotkey)
     srand((unsigned)time(NULL));
     std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
+    std::vector<std::thread> workers;
 
     clock_t time_start = clock();
 
@@ -48,15 +49,20 @@ TEST(hotkey_detect_test, find_hotkey)
 
     // test capture 0 hotspot && blob data
     ASSERT_EQ(collector->get_status(), "COARSE");
-    dsn::blob key;
-    for (int i = 0; i < 1000000; i++) {
-        std::string hashkey = hotkey_generator(false);
-        pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
-        collector->capture_blob_data(key);
-        if (i % 10000 == 0) {
-            collector->analyse_data();
-        }
+    for (int i = 0; i < 3; i++) {
+        workers.emplace_back(std::thread([]() {
+            dsn::blob key;
+            for (int i = 0; i < 10000; i++) {
+                std::string hashkey = hotkey_generator(false);
+                pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
+                collector->capture_blob_data(key);
+                if (i % 1000 == 0) {
+                    collector->analyse_data();
+                }
+            }
+        }));
     }
+    std::for_each(workers.begin(), workers.end(), [](std::thread &t;) { t.join(); });
     // test automatic destruction
     collector->kMaxTime_sec = 0;
     collector->analyse_data();
