@@ -226,10 +226,8 @@ private:
     static void update_server_rocksdb_statistics();
 
     // get the absolute path of restore directory and the flag whether force restore from env
-    // return
-    //      std::pair<std::string, bool>, pair.first is the path of the restore dir; pair.second
-    //      is
-    //      the flag that whether force restore
+    // return std::pair<std::string, bool>, pair.first is the path of the restore dir; pair.second
+    // is the flag that whether force restore
     std::pair<std::string, bool>
     get_restore_dir_from_env(const std::map<std::string, std::string> &env_kvs);
 
@@ -295,7 +293,6 @@ private:
         if (time_used >= _slow_query_threshold_ns) {
             return true;
         }
-
         return false;
     }
 
