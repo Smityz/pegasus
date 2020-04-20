@@ -58,8 +58,11 @@ TEST(hotkey_detect_test, find_hotkey)
         }
     }
     collector->kMaxTime_sec = 0;
+    collector->analyse_data();
     ASSERT_EQ(collector->get_status(), "STOP");
     ASSERT_EQ(collector->get_result(result), false);
+    collector->kMaxTime_sec = 45;
+    ASSERT_TRUE(collector->init());
 
     for (int i = 0; i < 1000000; i++) {
         pegasus_generate_key(key, hotkey_generator(true), std::string("sortAAAAAAAAAAAAAAAA"));
