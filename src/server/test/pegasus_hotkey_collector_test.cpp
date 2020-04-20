@@ -62,7 +62,7 @@ TEST(hotkey_detect_test, find_hotkey)
             }
         }));
     }
-    std::for_each(workers.begin(), workers.end(), [](std::thread &t;) { t.join(); });
+    std::for_each(workers.begin(), workers.end(), [](std::thread &t) { t.join(); });
     // test automatic destruction
     collector->kMaxTime_sec = 0;
     collector->analyse_data();
