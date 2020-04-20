@@ -50,7 +50,7 @@ TEST(hotkey_detect_test, find_hotkey)
     // test capture 0 hotspot && blob data
     ASSERT_EQ(collector->get_status(), "COARSE");
     for (int i = 0; i < 3; i++) {
-        workers.emplace_back(std::thread([]() {
+        workers.emplace_back(std::thread([&]() {
             dsn::blob key;
             for (int i = 0; i < 10000; i++) {
                 std::string hashkey = hotkey_generator(false);
