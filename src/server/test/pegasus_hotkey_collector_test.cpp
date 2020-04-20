@@ -46,7 +46,7 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_TRUE(collector->init());
     ASSERT_FALSE(collector->init());
 
-    // test capture read data
+    // test capture 0 hotspot && blob data
     ASSERT_EQ(collector->get_status(), "COARSE");
     dsn::blob key;
     for (int i = 0; i < 1000000; i++) {
@@ -57,6 +57,7 @@ TEST(hotkey_detect_test, find_hotkey)
             collector->analyse_data();
         }
     }
+    // test automatic destruction
     collector->kMaxTime_sec = 0;
     collector->analyse_data();
     ASSERT_EQ(collector->get_status(), "STOP");
@@ -64,6 +65,7 @@ TEST(hotkey_detect_test, find_hotkey)
     collector->kMaxTime_sec = 45;
     ASSERT_TRUE(collector->init());
 
+    // test only one hotkey
     for (int i = 0; i < 1000000; i++) {
         pegasus_generate_key(key, hotkey_generator(true), std::string("sortAAAAAAAAAAAAAAAA"));
         collector->capture_blob_data(key);
