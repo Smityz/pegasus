@@ -56,13 +56,22 @@ bool hotkey_collector::analyse_fine_data()
         derror("analyse_fine_data map size = 0");
         return false;
     }
-    int count_max = -1;
-    std::string count_max_key;
-    for (const auto &iter : _fine_count)
+    int count_max = -1, count_min = 10000000;
+    std::string count_max_key, count_min_key;
+    for (const auto &iter : _fine_count) {
         if (iter.second > count_max) {
             count_max = iter.second;
             count_max_key = iter.first;
         }
+        if (iter.second < count_min) {
+            count_min = iter.second;
+            count_min_key = iter.first;
+        }
+    }
+    if (count_max_key != count_min_key && count_max - count_min < 50) {
+        derror("analyse_fine_data failed");
+        return false;
+    }
     _fine_result = count_max_key;
     return true;
 }
@@ -134,6 +143,11 @@ void hotkey_collector::analyse_data()
     if (_collector_state.load(std::memory_order_seq_cst) == STOP) {
         return;
     }
+    if (dsn_now_s() - _timestamp >= kMaxTime_sec) {
+        derror("ERR_NOT_FOUND_HOTKEY");
+        clear();
+        return;
+    }
     if (_collector_state.load(std::memory_order_seq_cst) == COARSE) {
         int coarse_result = analyse_coarse_data();
         if (coarse_result != -1) {
@@ -149,10 +163,6 @@ void hotkey_collector::analyse_data()
     }
     if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
         return;
-    }
-    if (dsn_now_s() - _timestamp > kMaxTime) {
-        derror("ERR_NOT_FOUND_HOTKEY");
-        clear();
     }
 }
 
@@ -182,11 +192,12 @@ const int hotkey_collector::analyse_coarse_data()
     for (int i = 0; i < data_samples.size(); i++) {
         double hot_point = (data_samples[i] - avg) / sd;
         hot_point = ceil(std::max(hot_point, double(0)));
-        if (hot_point > 3) {
+        if (hot_point > 4) {
             hotkey_hash_bucket.push_back(i);
         }
     }
     if (hotkey_hash_bucket.size() == 1) {
+        derror("Find a hot bucket in analyse_coarse_data(): %d", hotkey_hash_bucket.back());
         return hotkey_hash_bucket.back();
     }
     if (hotkey_hash_bucket.size() >= 2) {
@@ -200,6 +211,7 @@ const int hotkey_collector::analyse_coarse_data()
         }
         return hottest_index;
     }
+    derror("Can't find a hot bucket in analyse_coarse_data()");
     return -1;
 }
 

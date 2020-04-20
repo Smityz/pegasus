@@ -16,7 +16,14 @@ namespace server {
 class hotkey_collector
 {
 public:
-    hotkey_collector() : _collector_state(STOP), _coarse_result(-1) {}
+    hotkey_collector() : _collector_state(STOP), _coarse_result(-1)
+    {
+        kMaxTime_sec = dsn_config_get_value_uint64(
+            "pegasus.server",
+            "_hotkey_collector_max_exist_time",
+            45,
+            "_hotkey_collector_max_exist_time, after that the collection will stop automatically");
+    }
 
     bool init()
     {
@@ -99,7 +106,7 @@ private:
     std::string _fine_result;
     std::unordered_map<std::string, int> _fine_count;
     uint64_t _timestamp;
-    const int kMaxTime = 100;
+    uint64_t kMaxTime_sec;
 
     FRIEND_TEST(hotkey_detect_test, find_hotkey);
 };
