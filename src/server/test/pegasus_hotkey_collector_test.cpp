@@ -38,7 +38,7 @@ TEST(hotkey_detect_test, find_hotkey)
     srand((unsigned)time(NULL));
     std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
-    std::vector<std::thread> workers;
+    std::vector<std::thread> workers, workers1;
 
     clock_t time_start = clock();
 
@@ -75,7 +75,7 @@ TEST(hotkey_detect_test, find_hotkey)
     // test one hotkey with random data
     ASSERT_EQ(collector->get_status(), "COARSE");
     for (int i = 0; i < 3; i++) {
-        workers.emplace_back(std::thread([&]() {
+        workers1.emplace_back(std::thread([&]() {
             dsn::blob key;
             std::cout << 1 << std::endl;
             for (int j = 0; j < 10000; j++) {
