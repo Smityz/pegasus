@@ -82,6 +82,7 @@ TEST(hotkey_detect_test, find_hotkey)
                 pegasus_generate_key(key, hashkey, std::string("sortkeysortkeysortkeysortkey"));
                 collector->capture_blob_data(key);
                 if (i == 0 && j % 1000 == 0) {
+                    std:: << cout << "analyse!!!" << std::endl;
                     collector->analyse_data();
                 }
             }
