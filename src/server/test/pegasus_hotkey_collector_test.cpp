@@ -38,9 +38,9 @@ TEST(hotkey_detect_test, find_hotkey)
     srand((unsigned)time(NULL));
     std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
-    std::vector<std::thread> workers；
+    std::vector<std::thread> workers;
 
-        clock_t time_start = clock();
+    clock_t time_start = clock();
 
     // test hotkey_collector::init()
     ASSERT_EQ(collector->get_status(), "STOP");
