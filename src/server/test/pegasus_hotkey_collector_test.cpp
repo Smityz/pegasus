@@ -64,6 +64,7 @@ TEST(hotkey_detect_test, find_hotkey)
     }
     std::for_each(workers.begin(), workers.end(), [](std::thread &t) { t.join(); });
     std::cout << collector->get_status() << std::endl;
+    return;
 
     // test automatic destruction
     collector->kMaxTime_sec = 0;
