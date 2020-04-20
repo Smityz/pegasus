@@ -78,7 +78,7 @@ TEST(hotkey_detect_test, find_hotkey)
         workers1.emplace_back(std::thread([&]() {
             dsn::blob key;
             for (int j = 0; j < 10000; j++) {
-                std::string hashkey = hotkey_generator(false);
+                std::string hashkey = hotkey_generator(true);
                 pegasus_generate_key(key, hashkey, std::string("sortkeysortkeysortkeysortkey"));
                 collector->capture_blob_data(key);
                 if (i == 0 && j % 1000 == 0) {
