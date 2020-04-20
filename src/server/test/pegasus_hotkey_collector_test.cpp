@@ -38,9 +38,9 @@ TEST(hotkey_detect_test, find_hotkey)
     srand((unsigned)time(NULL));
     std::string result;
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
-    std::vector<std::thread> workers, workers1;
+    std::vector<std::thread> workers；
 
-    clock_t time_start = clock();
+        clock_t time_start = clock();
 
     // test hotkey_collector::init()
     ASSERT_EQ(collector->get_status(), "STOP");
@@ -75,21 +75,15 @@ TEST(hotkey_detect_test, find_hotkey)
     // test one hotkey with random data
     ASSERT_EQ(collector->get_status(), "COARSE");
     for (int i = 0; i < 3; i++) {
-        workers1.emplace_back(std::thread([&]() {
+        workers.emplace_back(std::thread([&]() {
             dsn::blob key;
-            std::cout << 1 << std::endl;
             for (int j = 0; j < 10000; j++) {
-                std::cout << 2 << std::endl;
-                std::string hashkey = hotkey_generator(true);
-                std::cout << 3 << std::endl;
+                std::string hashkey = hotkey_generator(false);
                 pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
-                std::cout << 4 << std::endl;
                 collector->capture_blob_data(key);
-                std::cout << 5 << std::endl;
                 if (i == 0 && j % 1000 == 0) {
                     collector->analyse_data();
                 }
-                std::cout << 6 << std::endl;
             }
         }));
     }
