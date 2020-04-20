@@ -87,8 +87,8 @@ TEST(hotkey_detect_test, find_hotkey)
             }
         }));
     }
-    return;
     std::for_each(workers.begin(), workers.end(), [](std::thread &t) { t.join(); });
+    return;
 
     ASSERT_EQ(collector->get_status(), "FINISH");
     ASSERT_EQ(collector->get_result(result), true);
