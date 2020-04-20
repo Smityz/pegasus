@@ -57,7 +57,7 @@ bool hotkey_collector::analyse_fine_data()
         return false;
     }
     int count_max = -1, count_min = 10000000;
-    std::string count_max_key;
+    std::string count_max_key, count_min_key;
     for (const auto &iter : _fine_count) {
         if (iter.second > count_max) {
             count_max = iter.second;
@@ -65,9 +65,10 @@ bool hotkey_collector::analyse_fine_data()
         }
         if (iter.second < count_min) {
             count_min = iter.second;
+            count_min_key = iter.first;
         }
     }
-    if (count_max - count_min < 50) {
+    if (count_max_key != count_min_key && count_max - count_min < 50) {
         derror("analyse_fine_data failed");
         return false;
     }
