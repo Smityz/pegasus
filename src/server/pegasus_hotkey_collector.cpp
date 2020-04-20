@@ -197,6 +197,7 @@ const int hotkey_collector::analyse_coarse_data()
         }
     }
     if (hotkey_hash_bucket.size() == 1) {
+        derror("Find a hot bucket in analyse_coarse_data(): %d"，hotkey_hash_bucket.back());
         return hotkey_hash_bucket.back();
     }
     if (hotkey_hash_bucket.size() >= 2) {
@@ -210,6 +211,7 @@ const int hotkey_collector::analyse_coarse_data()
         }
         return hottest_index;
     }
+    derror("Can't find a hot bucket in analyse_coarse_data()");
     return -1;
 }
 
