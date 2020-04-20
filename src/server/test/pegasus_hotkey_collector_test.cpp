@@ -71,13 +71,19 @@ TEST(hotkey_detect_test, find_hotkey)
     collector->kMaxTime_sec = 45;
     ASSERT_TRUE(collector->init());
 
-    // test only one hotkey
-    for (int i = 0; i < 1000000; i++) {
-        pegasus_generate_key(key, hotkey_generator(true), std::string("sortAAAAAAAAAAAAAAAA"));
-        collector->capture_blob_data(key);
-        if (i % 10000 == 0) {
-            collector->analyse_data();
-        }
+    // test one hotkey with random data
+    for (int i = 0; i < 3; i++) {
+        workers.emplace_back(std::thread([&]() {
+            dsn::blob key;
+            for (int i = 0; i < 10000; i++) {
+                std::string hashkey = hotkey_generator(true);
+                pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
+                collector->capture_blob_data(key);
+                if (i % 1000 == 0) {
+                    collector->analyse_data();
+                }
+            }
+        }));
     }
     ASSERT_EQ(collector->get_status(), "FINISH");
     ASSERT_EQ(collector->get_result(result), true);
@@ -86,14 +92,14 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_TRUE(collector->init());
     ASSERT_EQ(collector->get_status(), "COARSE");
 
-    for (int i = 0; i < 100000; i++) {
+    // test only one key in the data sample
+    for (int i = 0; i < 10000; i++) {
         dsn::blob key;
         pegasus_generate_key(
             key, std::string("hashAAAAAAAAAAAAAAAA"), std::string("sortAAAAAAAAAAAAAAAA"));
         dsn::apps::update_request req;
         req.key = key;
         req.value.assign("value", 0, 5);
-
         int put_rpc_cnt = dsn::rand::next_u32(1, 10);
         int remove_rpc_cnt = dsn::rand::next_u32(1, 10);
         int total_rpc_cnt = put_rpc_cnt + remove_rpc_cnt;
@@ -106,7 +112,7 @@ TEST(hotkey_detect_test, find_hotkey)
         }
         auto cleanup = dsn::defer([=]() { delete[] writes; });
         collector->capture_msg_data(writes, total_rpc_cnt);
-        if (i % 10000 == 0) {
+        if (i % 1000 == 0) {
             collector->analyse_data();
         }
     }
