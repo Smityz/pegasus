@@ -75,19 +75,21 @@ TEST(hotkey_detect_test, find_hotkey)
     // test one hotkey with random data
     ASSERT_EQ(collector->get_status(), "COARSE");
     for (int i = 0; i < 3; i++) {
-        workers1.emplace_back(std::thread([&]() {
-            dsn::blob key;
-            for (int j = 0; j < 10000; j++) {
-                std::string hashkey = hotkey_generator(true);
-                pegasus_generate_key(key, hashkey, std::string("sortkeysortkeysortkeysortkey"));
-                collector->capture_blob_data(key);
-                std::cout << "@@@@@  " << i << std::endl;
-                if (i == 0 && j % 1000 == 0) {
-                    std::cout << "!!!!!" << std::endl;
-                    collector->analyse_data();
+        workers1.emplace_back(
+            std::thread([&](int index) {
+                dsn::blob key;
+                for (int j = 0; j < 10000; j++) {
+                    std::string hashkey = hotkey_generator(true);
+                    pegasus_generate_key(key, hashkey, std::string("sortkeysortkeysortkeysortkey"));
+                    collector->capture_blob_data(key);
+                    std::cout << "@@@@@  " << index << std::endl;
+                    if (index == 0 && j % 1000 == 0) {
+                        std::cout << "!!!!!" << std::endl;
+                        collector->analyse_data();
+                    }
                 }
-            }
-        }));
+            }),
+            i);
     }
     std::for_each(workers1.begin(), workers1.end(), [](std::thread &t) { t.join(); });
 
