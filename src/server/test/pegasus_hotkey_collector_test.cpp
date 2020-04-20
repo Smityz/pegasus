@@ -40,8 +40,6 @@ TEST(hotkey_detect_test, find_hotkey)
     std::unique_ptr<hotkey_collector> collector(new hotkey_collector);
     std::vector<std::thread> workers, workers1;
 
-    clock_t time_start = clock();
-
     // test hotkey_collector::init()
     ASSERT_EQ(collector->get_status(), "STOP");
     ASSERT_TRUE(collector->init());
@@ -128,10 +126,6 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(result, "ThisisahotkeyThisisahotkey");
     collector->clear();
     ASSERT_EQ(collector->get_status(), "STOP");
-
-    clock_t time_end = clock();
-    std::cout << "time use:" << 1000 * (time_end - time_start) / (double)CLOCKS_PER_SEC << "ms"
-              << std::endl;
 }
 
 } // namespace server
