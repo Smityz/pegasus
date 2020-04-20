@@ -57,12 +57,7 @@ TEST(hotkey_detect_test, find_hotkey)
             collector->analyse_data();
         }
     }
-    sleep(20);
-    collector->analyse_data();
-    collector->analyse_data();
-    collector->analyse_data();
-    collector->analyse_data();
-    collector->analyse_data();
+    collector->kMaxTime_sec = 0;
     ASSERT_EQ(collector->get_status(), "STOP");
     ASSERT_EQ(collector->get_result(result), false);
 
