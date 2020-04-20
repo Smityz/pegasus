@@ -52,17 +52,18 @@ TEST(hotkey_detect_test, find_hotkey)
     for (int i = 0; i < 3; i++) {
         workers.emplace_back(std::thread([&]() {
             dsn::blob key;
-            for (int i = 0; i < 10000; i++) {
+            for (int j = 0; j < 10000; j++) {
                 std::string hashkey = hotkey_generator(false);
                 pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
                 collector->capture_blob_data(key);
-                if (i % 1000 == 0) {
+                if (i == 0 && j % 1000 == 0) {
                     collector->analyse_data();
                 }
             }
         }));
     }
     std::for_each(workers.begin(), workers.end(), [](std::thread &t) { t.join(); });
+
     // test automatic destruction
     collector->kMaxTime_sec = 0;
     collector->analyse_data();
@@ -72,19 +73,22 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_TRUE(collector->init());
 
     // test one hotkey with random data
+    ASSERT_EQ(collector->get_status(), "COARSE");
     for (int i = 0; i < 3; i++) {
         workers.emplace_back(std::thread([&]() {
             dsn::blob key;
-            for (int i = 0; i < 10000; i++) {
+            for (int j = 0; j < 10000; j++) {
                 std::string hashkey = hotkey_generator(true);
                 pegasus_generate_key(key, hashkey, std::string("sortAAAAAAAAAAAAAAAA"));
                 collector->capture_blob_data(key);
-                if (i % 1000 == 0) {
+                if (i == 0 && j % 1000 == 0) {
                     collector->analyse_data();
                 }
             }
         }));
     }
+    std::for_each(workers.begin(), workers.end(), [](std::thread &t) { t.join(); });
+
     ASSERT_EQ(collector->get_status(), "FINISH");
     ASSERT_EQ(collector->get_result(result), true);
     ASSERT_EQ(result, "AAAAAAAAAAAAAAAAAAAA");
