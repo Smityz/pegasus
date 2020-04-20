@@ -18,11 +18,11 @@ class hotkey_collector
 public:
     hotkey_collector() : _collector_state(STOP), _coarse_result(-1)
     {
-        kMaxTime_sec = std::chrono::seconds(dsn_config_get_value_uint64(
+        kMaxTime_sec = dsn_config_get_value_uint64(
             "pegasus.server",
             "_hotkey_collector_max_exist_time",
             45,
-            "_hotkey_collector_max_exist_time, after that the collection will stop automatically"));
+            "_hotkey_collector_max_exist_time, after that the collection will stop automatically");
     }
 
     bool init()
@@ -34,7 +34,7 @@ public:
         if (_collector_state.load(std::memory_order_seq_cst) == FINISH) {
             clear();
         }
-        _timestamp = clock();
+        _timestamp = dsn_now_s();
         _collector_state.store(COARSE, std::memory_order_seq_cst);
         return true;
     }
@@ -105,8 +105,8 @@ private:
     } _fine_capture_unit[103];
     std::string _fine_result;
     std::unordered_map<std::string, int> _fine_count;
-    clock_t _timestamp;
-    std::chrono::seconds kMaxTime_sec;
+    uint64_t _timestamp;
+    uint64_t kMaxTime_sec;
 
     FRIEND_TEST(hotkey_detect_test, find_hotkey);
 };
