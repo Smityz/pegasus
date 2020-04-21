@@ -139,6 +139,12 @@ TEST(hotkey_detect_test, find_hotkey)
     dsn::apps::update_request thrift_request;
     unmarshall(requests[0], thrift_request);
     key = thrift_request.key;
+    unmarshall(requests[0], thrift_request);
+    key = thrift_request.key;
+    unmarshall(requests[0], thrift_request);
+    key = thrift_request.key;
+    unmarshall(requests[0], thrift_request);
+    key = thrift_request.key;
 }
 
 } // namespace server
