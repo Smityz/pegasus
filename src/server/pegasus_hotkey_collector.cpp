@@ -76,11 +76,15 @@ bool hotkey_collector::analyse_fine_data()
     return true;
 }
 
-void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int count)
+void hotkey_collector::capture_msg_data(dsn::message_ex **requests_raw, const int count)
 {
     if (_collector_state.load(std::memory_order_seq_cst) == STOP || count == 0) {
         return;
     }
+
+    dsn::message_ex requests;
+    memcpy(&requests, requests_raw, sizeof(*requests_raw));
+
     for (int i = 0; i < count; i++) {
         ::dsn::blob key;
         if (requests[i] != nullptr && requests[i]->buffers.size() >= 2) {
