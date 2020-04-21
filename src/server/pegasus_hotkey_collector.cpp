@@ -76,7 +76,7 @@ bool hotkey_collector::analyse_fine_data()
     return true;
 }
 
-void hotkey_collector::capture_msg_data(dsn::message_ex requests, const int count)
+void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int count)
 {
     if (_collector_state.load(std::memory_order_seq_cst) == STOP || count == 0) {
         return;
