@@ -85,22 +85,24 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
         ::dsn::blob key;
         if (requests[i] != nullptr && requests[i]->buffers.size() >= 2) {
             dsn::task_code rpc_code(requests[0]->rpc_code());
-            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
-                auto rpc = multi_put_rpc::capture_data(requests[0]);
-                key = rpc.request().hash_key;
-            }
-            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_INCR) {
-                auto rpc = incr_rpc::capture_data(requests[0]);
-                key = rpc.request().key;
-            }
-            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_CHECK_AND_SET) {
-                auto rpc = check_and_set_rpc::capture_data(requests[0]);
-                key = rpc.request().hash_key;
-            }
-            if (rpc_code == dsn::apps::RPC_RRDB_RRDB_CHECK_AND_MUTATE) {
-                auto rpc = check_and_mutate_rpc::capture_data(requests[0]);
-                key = rpc.request().hash_key;
-            }
+            /*
+             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
+                 auto rpc = multi_put_rpc::capture_data(requests[0]);
+                 key = rpc.request().hash_key;
+             }
+             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_INCR) {
+                 auto rpc = incr_rpc::capture_data(requests[0]);
+                 key = rpc.request().key;
+             }
+             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_CHECK_AND_SET) {
+                 auto rpc = check_and_set_rpc::capture_data(requests[0]);
+                 key = rpc.request().hash_key;
+             }
+             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_CHECK_AND_MUTATE) {
+                 auto rpc = check_and_mutate_rpc::capture_data(requests[0]);
+                 key = rpc.request().hash_key;
+             }
+             */
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_PUT) {
                 rpc_holder rpc(requests[i]);
                 key = rpc.request().key;
