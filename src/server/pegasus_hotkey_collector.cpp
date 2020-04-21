@@ -76,7 +76,7 @@ bool hotkey_collector::analyse_fine_data()
     return true;
 }
 
-void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int count)
+void hotkey_collector::capture_msg_data(dsn::message_ex requests, const int count)
 {
     if (_collector_state.load(std::memory_order_seq_cst) == STOP || count == 0) {
         return;
@@ -102,8 +102,9 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
                 key = rpc.request().hash_key;
             }
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_PUT) {
-                auto rpc = put_rpc::capture_data(requests[i]);
-                key = rpc.request().key;
+                std::unique_ptr<dsn::apps::update_request> thrift_request;
+                unmarshall(requests[i], *thrift_request);
+                key = thrift_request->key;
             }
             if (key.length() < 2)
                 return;
