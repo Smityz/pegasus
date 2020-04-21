@@ -97,7 +97,7 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(collector->get_status(), "COARSE");
 
     // test only one key in the data sample && capture message_ex data
-    for (int i = 0; i < 10000; i++) {
+    for (int step = 0; step < 10000; step++) {
         dsn::blob key;
         pegasus_generate_key(key,
                              std::string("ThisisahotkeyThisisahotkey"),
@@ -117,7 +117,7 @@ TEST(hotkey_detect_test, find_hotkey)
         }
         auto cleanup = dsn::defer([=]() { delete[] writes; });
         collector->capture_msg_data(writes, total_rpc_cnt);
-        if (i % 1000 == 0) {
+        if (step % 1000 == 0) {
             collector->analyse_data();
         }
     }
