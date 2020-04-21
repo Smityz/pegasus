@@ -88,7 +88,7 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
                 std::unique_ptr<dsn::apps::multi_put_request> thrift_request;
                 unmarshall(requests[0], *thrift_request);
-                key = thrift_request.hash_key;
+                key = thrift_request->hash_key;
             }
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_INCR) {
                 auto rpc = incr_rpc::capture_data(requests[0]);
