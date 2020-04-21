@@ -623,7 +623,8 @@ int pegasus_server_impl::on_batched_write_requests(int64_t decree,
     dassert(requests != nullptr, "");
     _write_hotkey_collector->capture_msg_data(requests, count);
 
-    return _server_write->on_batched_write_requests(requests, count, decree, timestamp);
+    return 1;
+    // return _server_write->on_batched_write_requests(requests, count, decree, timestamp);
 }
 
 void pegasus_server_impl::on_get(const ::dsn::blob &key,

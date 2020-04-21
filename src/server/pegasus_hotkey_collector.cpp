@@ -84,7 +84,7 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
     }
     for (int i = 0; i < count; i++) {
         ::dsn::blob key;
-        if (requests[i] != nullptr && requests[i]->buffers.size() >= 2) {
+        if (requests[i] != nullptr) {
             dsn::task_code rpc_code(requests[0]->rpc_code());
             /*
              if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
