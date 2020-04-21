@@ -86,9 +86,9 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
         if (requests[i] != nullptr && requests[i]->buffers.size() >= 2) {
             dsn::task_code rpc_code(requests[0]->rpc_code());
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
-                std::unique_ptr<dsn::apps::multi_put_request> thrift_request;
-                unmarshall(requests[0], *thrift_request);
-                key = thrift_request->hash_key;
+                std::unique_ptr<multi_put_request> thrift_request;
+                auto rpc = multi_put_rpc::capture_data(requests[0]);
+                key = rpc.request().hash_key;
             }
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_INCR) {
                 auto rpc = incr_rpc::capture_data(requests[0]);
@@ -103,9 +103,8 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
                 key = rpc.request().hash_key;
             }
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_PUT) {
-                std::unique_ptr<dsn::apps::update_request> thrift_request;
-                unmarshall(requests[i], *thrift_request);
-                key = thrift_request->key;
+                auto rpc = put_rpc::capture_data(requests[i]);
+                key = rpc.request().key;
             }
             if (key.length() < 2)
                 return;
