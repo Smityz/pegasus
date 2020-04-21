@@ -621,8 +621,7 @@ int pegasus_server_impl::on_batched_write_requests(int64_t decree,
 {
     dassert(_is_open, "");
     dassert(requests != nullptr, "");
-    auto requests_pointer = requests;
-    _write_hotkey_collector->capture_msg_data(requests_copy, count);
+    _write_hotkey_collector->capture_msg_data(requests, count);
 
     return _server_write->on_batched_write_requests(requests, count, decree, timestamp);
 }
