@@ -66,8 +66,7 @@ int pegasus_server_write::on_batched_write_requests(dsn::message_ex **requests,
         auto rpc = check_and_mutate_rpc::auto_reply(requests[0]);
         return _write_svc->check_and_mutate(_decree, rpc.request(), rpc.response());
     }
-    return 0;
-    // return on_batched_writes(requests, count);
+    return on_batched_writes(requests, count);
 }
 
 void pegasus_server_write::set_default_ttl(uint32_t ttl) { _write_svc->set_default_ttl(ttl); }
