@@ -86,7 +86,7 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
         if (requests[i] != nullptr && requests[i]->buffers.size() >= 2) {
             dsn::task_code rpc_code(requests[0]->rpc_code());
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_MULTI_PUT) {
-                std::unique_ptr<multi_put_request> thrift_request;
+                std::unique_ptr<dsn::apps::multi_put_request> thrift_request;
                 unmarshall(requests[0], *thrift_request);
                 key = thrift_request.hash_key;
             }
