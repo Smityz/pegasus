@@ -6,7 +6,6 @@
 
 #include "base/pegasus_key_schema.h"
 #include "base/pegasus_rpc_types.h"
-#include <dsn/cpp/rpc_holder.h>
 #include <math.h>
 
 namespace pegasus {

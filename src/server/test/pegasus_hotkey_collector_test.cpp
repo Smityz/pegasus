@@ -126,6 +126,19 @@ TEST(hotkey_detect_test, find_hotkey)
     ASSERT_EQ(result, "ThisisahotkeyThisisahotkey");
     collector->clear();
     ASSERT_EQ(collector->get_status(), "STOP");
+
+    dsn::blob key;
+    pegasus_generate_key(key,
+                         std::string("ThisisahotkeyThisisahotkey"),
+                         std::string("sortkeysortkeysortkeysortkey"));
+    dsn::apps::update_request req;
+    req.key = key;
+    req.value.assign("value", 0, 5);
+    auto requests = new dsn::message_ex *[1];
+    requests[0] = pegasus::create_put_request(req);
+    dsn::apps::update_request thrift_request;
+    unmarshall(requests[0], thrift_request);
+    key = thrift_request.key;
 }
 
 } // namespace server
