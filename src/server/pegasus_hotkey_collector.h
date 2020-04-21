@@ -56,7 +56,7 @@ public:
     }
 
     void capture_blob_data(const ::dsn::blob &key);
-    void capture_msg_data(dsn::message_ex requests, const int count);
+    void capture_msg_data(dsn::message_ex **requests, const int count);
     void capture_str_data(const std::string &data);
 
     void analyse_data();
