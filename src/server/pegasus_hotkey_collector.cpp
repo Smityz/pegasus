@@ -105,7 +105,7 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
              }
              */
             if (rpc_code == dsn::apps::RPC_RRDB_RRDB_PUT) {
-                dsn::rpc_holder rpc(requests[i]);
+                put_rpc::rpc_holder rpc(requests[i]);
                 key = rpc.request().key;
             }
             if (key.length() < 2)
