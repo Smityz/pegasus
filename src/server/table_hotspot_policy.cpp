@@ -108,8 +108,7 @@ void hotspot_calculator::start_alg()
             }
         }
     }
-} // namespace server
-} // namespace server
+}
 
-} // namespace pegasus
+} // namespace server
 } // namespace pegasus
