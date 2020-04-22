@@ -101,16 +101,15 @@ void hotspot_calculator::start_alg()
                 notice_replica(this->_app_name, i, true);
                 _over_threshold_times_read[i] = 0;
             }
-        }
-        if (_points[i].write_hotpartition_counter->get_value() >= kHotPartitionT &&
-            ++_over_threshold_times_write[i] > kHotRpcT) {
-            notice_replica(this->_app_name, i, false);
-            _over_threshold_times_write[i] = 0;
+            if (_points[i].write_hotpartition_counter->get_value() >= kHotPartitionT &&
+                ++_over_threshold_times_write[i] > kHotRpcT) {
+                notice_replica(this->_app_name, i, false);
+                _over_threshold_times_write[i] = 0;
+            }
         }
     }
-}
 } // namespace server
-} // namespace pegasus
+} // namespace server
 
 } // namespace pegasus
 } // namespace pegasus
