@@ -83,7 +83,7 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
             } else if (err == ERR_TIMEOUT) {
                 ddebug("this hotspot rpc is time_out");
             }
-        },
+        }),
         std::chrono::seconds(10),
         partition_index,
         0);
