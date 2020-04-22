@@ -71,7 +71,7 @@ public:
     void init_perf_counter(const int perf_counter_count);
     static void notice_replica(const std::string &app_name,
                                const int partition_index,
-                               const bool if_read_request);
+                               const bool is_read_request);
 
 private:
     const std::string _app_name;

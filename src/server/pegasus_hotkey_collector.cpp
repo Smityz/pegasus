@@ -121,8 +121,8 @@ void hotkey_collector::capture_blob_data(const ::dsn::blob &key)
     if (_collector_state.load(std::memory_order_seq_cst) == STOP) {
         return;
     }
-    std::string hash_key, soft_key;
-    pegasus_restore_key(key, hash_key, soft_key);
+    std::string hash_key, sort_key;
+    pegasus_restore_key(key, hash_key, sort_key);
     capture_str_data(hash_key);
 }
 
