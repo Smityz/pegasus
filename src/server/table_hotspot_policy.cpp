@@ -67,27 +67,26 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     auto resolver = partition_resolver::get_resolver(cluster_name, meta_servers, app_name.c_str());
     ::dsn::apps::start_hotkey_detect_request req;
     req.type = is_read_request ? dsn::apps::hotkey_type::READ : dsn::apps::hotkey_type::WRITE;
-    resolver->call_op(
-        RPC_START_DETECT_HOTKEY,
-        req,
-        nullptr,
-        [app_name, partition_index, is_read_request](
-            error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
-            if (err == ERR_OK) {
-                ::dsn::apps::start_hotkey_detect_response response;
-                ::dsn::unmarshall(resp, response);
-                if (response.err == ERR_OK) {
-                    ddebug("detect hotspot rpc sending succeed");
-                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
-                    ddebug("this hotspot rpc has been sending");
-                } else if (err == ERR_TIMEOUT) {
-                    ddebug("this hotspot rpc is time_out");
-                }
-            }
-        },
-        std::chrono::seconds(10),
-        partition_index,
-        0);
+    resolver->call_op(RPC_START_DETECT_HOTKEY,
+                      req,
+                      nullptr,
+                      [app_name, partition_index, is_read_request](
+                          error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+                          if (err == ERR_OK) {
+                              ::dsn::apps::start_hotkey_detect_response response;
+                              ::dsn::unmarshall(resp, response);
+                              if (response.err == ERR_OK) {
+                                  ddebug("detect hotspot rpc sending succeed");
+                              } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
+                                  ddebug("this hotspot rpc has been sending");
+                              } else if (err == ERR_TIMEOUT) {
+                                  ddebug("this hotspot rpc is time_out");
+                              }
+                          }
+                      },
+                      std::chrono::seconds(10),
+                      partition_index,
+                      0);
 }
 
 void hotspot_calculator::start_alg()
