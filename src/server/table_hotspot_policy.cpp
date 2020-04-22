@@ -73,19 +73,18 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
         nullptr,
         [app_name, partition_index, is_read_request](
             error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
-        if (err == ERR_OK) {
-            ::dsn::apps::start_hotkey_detect_response response;
-            ::dsn::unmarshall(resp, response);
-            if (response.err == ERR_OK) {
-                ddebug("detect hotspot rpc sending succeed");
-            } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
-                ddebug("this hotspot rpc has been sending");
-            } else if (err == ERR_TIMEOUT) {
-                ddebug("this hotspot rpc is time_out");
+            if (err == ERR_OK) {
+                ::dsn::apps::start_hotkey_detect_response response;
+                ::dsn::unmarshall(resp, response);
+                if (response.err == ERR_OK) {
+                    ddebug("detect hotspot rpc sending succeed");
+                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
+                    ddebug("this hotspot rpc has been sending");
+                } else if (err == ERR_TIMEOUT) {
+                    ddebug("this hotspot rpc is time_out");
+                }
             }
-        }
-        }
-        ),
+        },
         std::chrono::seconds(10),
         partition_index,
         0);
