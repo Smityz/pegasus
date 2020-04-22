@@ -83,7 +83,9 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
             } else if (err == ERR_TIMEOUT) {
                 ddebug("this hotspot rpc is time_out");
             }
-        }),
+        }
+        }
+        ),
         std::chrono::seconds(10),
         partition_index,
         0);
@@ -91,25 +93,25 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
 
 void hotspot_calculator::start_alg()
 {
-        ddebug("start to detect hotspot partition");
-        _policy->analysis(_app_data, _points);
-        if (_hotkey_auto_detect) {
-            for (int i = 0; i < _points.size(); i++) {
-                if (_points[i].read_hotpartition_counter->get_value() >= kHotPartitionT &&
-                    ++_over_threshold_times_read[i] > kHotRpcT) {
-                    notice_replica(this->_app_name, i, true);
-                    _over_threshold_times_read[i] = 0;
-                }
-            }
-            if (_points[i].write_hotpartition_counter->get_value() >= kHotPartitionT &&
-                ++_over_threshold_times_write[i] > kHotRpcT) {
-                notice_replica(this->_app_name, i, false);
-                _over_threshold_times_write[i] = 0;
+    ddebug("start to detect hotspot partition");
+    _policy->analysis(_app_data, _points);
+    if (_hotkey_auto_detect) {
+        for (int i = 0; i < _points.size(); i++) {
+            if (_points[i].read_hotpartition_counter->get_value() >= kHotPartitionT &&
+                ++_over_threshold_times_read[i] > kHotRpcT) {
+                notice_replica(this->_app_name, i, true);
+                _over_threshold_times_read[i] = 0;
             }
         }
+        if (_points[i].write_hotpartition_counter->get_value() >= kHotPartitionT &&
+            ++_over_threshold_times_write[i] > kHotRpcT) {
+            notice_replica(this->_app_name, i, false);
+            _over_threshold_times_write[i] = 0;
         }
+    }
 }
 } // namespace server
+} // namespace pegasus
 
 } // namespace pegasus
 } // namespace pegasus
