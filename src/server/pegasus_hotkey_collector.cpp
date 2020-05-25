@@ -232,26 +232,34 @@ bool hotkey_collector::variance_cal(const std::vector<int> &data_samples,
 {
     bool is_hotkey = false;
     int data_size = data_samples.size();
-    double total = 0, sd = 0, avg = 0;
+    double total = 0;
     for (const auto &data_sample : data_samples) {
         total += data_sample;
     }
     // in case of sample size too small
-    if (total < data_size) {
-        derror("Data sample is too small");
+    if (data_size < 3 || total < data_size) {
         for (int i = 0; i < data_size; i++)
             hot_values.emplace_back(0);
         return false;
     }
-    avg = total / data_size;
-    for (auto data_sample : data_samples) {
-        sd += pow((data_sample - avg), 2);
-    }
-    sd = sqrt(sd / data_size);
+    std::vector<double> avgs;
+    std::vector<double> sds;
     for (int i = 0; i < data_size; i++) {
-        double hot_point = (data_samples[i] - avg) / sd;
+        double avg = (total - data_samples[i]) / (data_size - 1);
+        double sd = 0;
+        for (int j = 0; j < data_size; j++) {
+            if (j != i) {
+                sd += (data_samples[j] - avg) * (data_samples[j] - avg);
+            }
+        }
+        sd = sqrt(sd / (data_size - 2));
+        avgs.emplace_back(avg);
+        sds.emplace_back(sd);
+    }
+    for (int i = 0; i < data_size; i++) {
+        double hot_point = (data_samples[i] - avgs[i]) / sds[i];
         hot_point = ceil(std::max(hot_point, double(0)));
-        hot_values.emplace_back((int)hot_point);
+        hot_values.emplace_back(hot_point);
         if (hot_point >= threshold) {
             is_hotkey = true;
         }

@@ -85,11 +85,6 @@ bool hotkey_fine_data_collector::analyse_fine_data(std::string &result)
             count_max_key = iter.first;
         }
     }
-    derror("<<<<<<<<<<");
-    for (auto iter : data_samples) {
-        derror("%d ", iter);
-    }
-    derror(">>>>>>>>>>");
     if (hotkey_collector::variance_cal(data_samples, hot_values, _data_variance_threshold)) {
         result = count_max_key;
         return true;
