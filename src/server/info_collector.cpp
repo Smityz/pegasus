@@ -13,6 +13,7 @@
 #include <dsn/dist/fmt_logging.h>
 
 #include "base/pegasus_const.h"
+#include "hotspot_algo_qps_variance.h"
 #include "result_writer.h"
 
 using namespace ::dsn;
@@ -103,13 +104,13 @@ info_collector::~info_collector()
 
 void info_collector::start()
 {
-    _app_stat_timer_task =
-        ::dsn::tasking::enqueue_timer(LPC_PEGASUS_APP_STAT_TIMER,
-                                      &_tracker,
-                                      [this] { on_app_stat(); },
-                                      std::chrono::seconds(_app_stat_interval_seconds),
-                                      0,
-                                      std::chrono::minutes(1));
+    _app_stat_timer_task = ::dsn::tasking::enqueue_timer(
+        LPC_PEGASUS_APP_STAT_TIMER,
+        &_tracker,
+        [this] { on_app_stat(); },
+        std::chrono::seconds(_app_stat_interval_seconds),
+        0,
+        std::chrono::minutes(1));
 
     _capacity_unit_stat_timer_task = ::dsn::tasking::enqueue_timer(
         LPC_PEGASUS_CAPACITY_UNIT_STAT_TIMER,
@@ -242,11 +243,12 @@ void info_collector::on_capacity_unit_stat(int remaining_retry_count)
                   "wait %u seconds to retry",
                   remaining_retry_count,
                   _capacity_unit_retry_wait_seconds);
-            ::dsn::tasking::enqueue(LPC_PEGASUS_CAPACITY_UNIT_STAT_TIMER,
-                                    &_tracker,
-                                    [=] { on_capacity_unit_stat(remaining_retry_count - 1); },
-                                    0,
-                                    std::chrono::seconds(_capacity_unit_retry_wait_seconds));
+            ::dsn::tasking::enqueue(
+                LPC_PEGASUS_CAPACITY_UNIT_STAT_TIMER,
+                &_tracker,
+                [=] { on_capacity_unit_stat(remaining_retry_count - 1); },
+                0,
+                std::chrono::seconds(_capacity_unit_retry_wait_seconds));
         } else {
             derror("get capacity unit stat failed, remaining_retry_count = 0, no retry anymore");
         }
@@ -289,11 +291,12 @@ void info_collector::on_storage_size_stat(int remaining_retry_count)
                   "wait %u seconds to retry",
                   remaining_retry_count,
                   _storage_size_retry_wait_seconds);
-            ::dsn::tasking::enqueue(LPC_PEGASUS_STORAGE_SIZE_STAT_TIMER,
-                                    &_tracker,
-                                    [=] { on_storage_size_stat(remaining_retry_count - 1); },
-                                    0,
-                                    std::chrono::seconds(_storage_size_retry_wait_seconds));
+            ::dsn::tasking::enqueue(
+                LPC_PEGASUS_STORAGE_SIZE_STAT_TIMER,
+                &_tracker,
+                [=] { on_storage_size_stat(remaining_retry_count - 1); },
+                0,
+                std::chrono::seconds(_storage_size_retry_wait_seconds));
         } else {
             derror("get storage size stat failed, remaining_retry_count = 0, no retry anymore");
         }
@@ -314,15 +317,13 @@ hotspot_calculator *info_collector::get_hotspot_calculator(const std::string &ap
     std::unique_ptr<hotspot_policy> policy;
     if (_hotspot_detect_algorithm == "hotspot_algo_qps_variance") {
         policy.reset(new hotspot_algo_qps_variance());
-    } else if (_hotspot_detect_algorithm == "hotspot_algo_qps_skew") {
-        policy.reset(new hotspot_algo_qps_skew());
     } else {
         dwarn("hotspot detection is disabled");
         _hotspot_calculator_store[app_name_pcount] = nullptr;
         return nullptr;
     }
     hotspot_calculator *calculator =
-        new hotspot_calculator(app_name_pcount, partition_num, std::move(policy));
+        new hotspot_calculator(app_name, partition_num, std::move(policy));
     _hotspot_calculator_store[app_name_pcount] = calculator;
     return calculator;
 }

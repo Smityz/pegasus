@@ -9,11 +9,22 @@
 #include <algorithm>
 #include <gtest/gtest_prod.h>
 #include <math.h>
+#include <dsn/dist/replication/duplication_common.h>
 
 #include <dsn/perf_counter/perf_counter.h>
 
 namespace pegasus {
 namespace server {
+
+const int kMaxQueueSize = 100;
+typedef std::queue<std::vector<hotspot_partition_data>> partition_data_queue;
+
+struct hotpartition_counter
+{
+    ::dsn::perf_counter_wrapper read_hotpartition_counter;
+    ::dsn::perf_counter_wrapper write_hotpartition_counter;
+};
+
 class hotspot_policy
 {
 public:
@@ -21,74 +32,8 @@ public:
     // it uses rolling queue to save one app's data
     // vector is used to save the partitions' data of this app
     // hotspot_partition_data is used to save data of one partition
-    virtual void analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
-                          std::vector<::dsn::perf_counter_wrapper> &perf_counters) = 0;
-};
-
-class hotspot_algo_qps_skew : public hotspot_policy
-{
-public:
-    void analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
-                  std::vector<::dsn::perf_counter_wrapper> &perf_counters)
-    {
-        const auto &anly_data = hotspot_app_data.back();
-        double min_total_qps = INT_MAX;
-        for (auto partition_anly_data : anly_data) {
-            min_total_qps = std::min(min_total_qps, partition_anly_data.total_qps);
-        }
-        min_total_qps = std::max(1.0, min_total_qps);
-        dassert(anly_data.size() == perf_counters.size(), "partition counts error, please check");
-        for (int i = 0; i < perf_counters.size(); i++) {
-            perf_counters[i]->set(anly_data[i].total_qps / min_total_qps);
-        }
-    }
-};
-
-// PauTa Criterion
-class hotspot_algo_qps_variance : public hotspot_policy
-{
-public:
-    void analysis(const std::queue<std::vector<hotspot_partition_data>> &hotspot_app_data,
-                  std::vector<::dsn::perf_counter_wrapper> &perf_counters)
-    {
-        dassert(hotspot_app_data.back().size() == perf_counters.size(),
-                "partition counts error, please check");
-        std::vector<double> data_samples;
-        data_samples.reserve(hotspot_app_data.size() * perf_counters.size());
-        auto temp_data = hotspot_app_data;
-        double total = 0, sd = 0, avg = 0;
-        int sample_count = 0;
-        // avg: Average number
-        // sd: Standard deviation
-        // sample_count: Number of samples
-        while (!temp_data.empty()) {
-            for (auto partition_data : temp_data.front()) {
-                if (partition_data.total_qps - 1.00 > 0) {
-                    data_samples.push_back(partition_data.total_qps);
-                    total += partition_data.total_qps;
-                    sample_count++;
-                }
-            }
-            temp_data.pop();
-        }
-        if (sample_count == 0) {
-            ddebug("hotspot_app_data size == 0");
-            return;
-        }
-        avg = total / sample_count;
-        for (auto data_sample : data_samples) {
-            sd += pow((data_sample - avg), 2);
-        }
-        sd = sqrt(sd / sample_count);
-        const auto &anly_data = hotspot_app_data.back();
-        for (int i = 0; i < perf_counters.size(); i++) {
-            double hot_point = (anly_data[i].total_qps - avg) / sd;
-            // perf_counter->set can only be unsigned __int64
-            // use ceil to guarantee conversion results
-            hot_point = ceil(std::max(hot_point, double(0)));
-            perf_counters[i]->set(hot_point);
-        }
-    }
+    virtual void analysis(const partition_data_queue &hotspot_app_data,
+                          std::vector<hotpartition_counter> &perf_counters) = 0;
 };
 
 // hotspot_calculator is used to find the hotspot in Pegasus
@@ -97,24 +42,23 @@ class hotspot_calculator
 public:
     hotspot_calculator(const std::string &app_name,
                        const int partition_num,
-                       std::unique_ptr<hotspot_policy> policy)
-        : _app_name(app_name), _points(partition_num), _policy(std::move(policy))
-    {
-        init_perf_counter(partition_num);
-    }
+                       std::unique_ptr<hotspot_policy> policy);
     void aggregate(const std::vector<row_data> &partitions);
     void start_alg();
     void init_perf_counter(const int perf_counter_count);
+    static void notify_replica(const std::string &app_name,
+                               const int partition_index,
+                               const bool is_read_request);
 
 private:
     const std::string _app_name;
-    std::vector<::dsn::perf_counter_wrapper> _points;
-    std::queue<std::vector<hotspot_partition_data>> _app_data;
+    std::vector<hotpartition_counter> _points;
+    std::vector<int> _over_threshold_times_read, _over_threshold_times_write;
+    partition_data_queue _app_data;
     std::unique_ptr<hotspot_policy> _policy;
-    static const int kMaxQueueSize = 100;
-
+    bool _enable_hotkey_auto_detect;
+    uint32_t _hotpartition_threshold, _occurrence_threshold;
     FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_variance);
-    FRIEND_TEST(table_hotspot_policy, hotspot_algo_qps_skew);
 };
 } // namespace server
 } // namespace pegasus

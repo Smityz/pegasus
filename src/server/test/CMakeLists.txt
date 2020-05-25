@@ -10,6 +10,10 @@ set(MY_PROJ_SRC "../pegasus_server_impl.cpp"
                 "../pegasus_mutation_duplicator.cpp"
                 "../table_hotspot_policy.cpp"
                 "../meta_store.cpp"
+                "../pegasus_hotkey_collector.cpp"
+                "../hotspot_algo_qps_variance.cpp"
+                "../fine_hotkey_collector.cpp"
+                "../coarse_hotkey_collector.cpp"
 )
 
 set(MY_SRC_SEARCH_MODE "GLOB")

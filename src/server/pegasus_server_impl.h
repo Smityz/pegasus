@@ -20,6 +20,7 @@
 #include "pegasus_manual_compact_service.h"
 #include "pegasus_write_service.h"
 #include "range_read_limiter.h"
+#include "pegasus_hotkey_collector.h"
 
 namespace pegasus {
 namespace server {
@@ -27,6 +28,7 @@ namespace server {
 class meta_store;
 class capacity_unit_calculator;
 class pegasus_server_write;
+class hotkey_collector;
 
 class pegasus_server_impl : public ::dsn::apps::rrdb_service
 {
@@ -55,6 +57,8 @@ public:
     void on_scan(const ::dsn::apps::scan_request &args,
                  ::dsn::rpc_replier<::dsn::apps::scan_response> &reply) override;
     void on_clear_scanner(const int64_t &args) override;
+    void on_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
+                          ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply) override;
 
     // input:
     //  - argc = 0 : re-open the db
@@ -158,6 +162,16 @@ public:
 
     std::string dump_write_request(dsn::message_ex *request) override;
 
+    const std::shared_ptr<hotkey_collector> get_read_hotkey_collector()
+    {
+        return _read_hotkey_collector;
+    }
+
+    const std::shared_ptr<hotkey_collector> get_write_hotkey_collector()
+    {
+        return _write_hotkey_collector;
+    }
+
 private:
     friend class manual_compact_service_test;
     friend class pegasus_compression_options_test;
@@ -218,9 +232,8 @@ private:
     static void update_server_rocksdb_statistics();
 
     // get the absolute path of restore directory and the flag whether force restore from env
-    // return
-    //      std::pair<std::string, bool>, pair.first is the path of the restore dir; pair.second is
-    //      the flag that whether force restore
+    // return std::pair<std::string, bool>, pair.first is the path of the restore dir; pair.second
+    // is the flag that whether force restore
     std::pair<std::string, bool>
     get_restore_dir_from_env(const std::map<std::string, std::string> &env_kvs);
 
@@ -308,6 +321,11 @@ private:
 
     ::dsn::error_code flush_all_family_columns(bool wait);
 
+    void on_start_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
+                                ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply);
+    void on_stop_detect_hotkey(const ::dsn::apps::hotkey_detect_request &args,
+                               ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply);
+
 private:
     static const std::string COMPRESSION_HEADER;
     // Column family names.
@@ -357,6 +375,7 @@ private:
     pegasus_context_cache _context_cache;
 
     std::chrono::seconds _update_rdb_stat_interval;
+    std::chrono::milliseconds _hotkey_analyse_time_interval;
     ::dsn::task_ptr _update_replica_rdb_stat;
     static ::dsn::task_ptr _update_server_rdb_stat;
 
@@ -365,6 +384,11 @@ private:
     std::atomic<int32_t> _partition_version;
 
     dsn::task_tracker _tracker;
+
+    std::shared_ptr<hotkey_collector> _read_hotkey_collector{
+        new hotkey_collector(dsn::apps::hotkey_type::READ)};
+    std::shared_ptr<hotkey_collector> _write_hotkey_collector{
+        new hotkey_collector(dsn::apps::hotkey_type::WRITE)};
 
     // perf counters
     ::dsn::perf_counter_wrapper _pfc_get_qps;
