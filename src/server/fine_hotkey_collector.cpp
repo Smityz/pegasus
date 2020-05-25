@@ -86,8 +86,8 @@ bool hotkey_fine_data_collector::analyse_fine_data(std::string &result)
         }
     }
     for (auto iter : data_samples) {
-        std::cout << *iter << std::endl;
-        derror("%d ", *iter);
+        std::cout << iter << std::endl;
+        derror("%d ", iter);
     }
     std::cout << "data_samples" << std::endl;
     if (hotkey_collector::variance_cal(data_samples, hot_values, _data_variance_threshold)) {
