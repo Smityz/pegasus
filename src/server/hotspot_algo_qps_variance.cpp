@@ -75,7 +75,6 @@ void hotspot_algo_qps_variance::write_analysis(const partition_data_queue &hotsp
         temp_data.pop();
     }
     if (sample_count == 0) {
-        ddebug("hotspot_app_data size == 0");
         return;
     }
     avg = total / sample_count;
