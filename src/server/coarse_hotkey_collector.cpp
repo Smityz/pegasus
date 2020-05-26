@@ -20,6 +20,7 @@ hotkey_coarse_data_collector::hotkey_coarse_data_collector(const hotkey_collecto
 void hotkey_coarse_data_collector::capture_coarse_data(const std::string &data)
 {
     int key_hash_val = _hotbucket_hash(data, _hotkey_collector_data_fragmentation);
+    std::cout << data << std::endl;
     ++_coarse_count[key_hash_val];
 }
 
