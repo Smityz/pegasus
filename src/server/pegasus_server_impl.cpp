@@ -1283,7 +1283,7 @@ void pegasus_server_impl::on_start_detect_hotkey(
     } else {
         int x = ::dsn::ERR_SERVICE_ALREADY_EXIST;
         int y = ::dsn::ERR_OK;
-        derror_replica("Has been detecting hotkey %d %d", x, y);
+        derror_replica("Has been detecting hotkey {} {}", x, y);
         resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
     }
     reply(resp);
