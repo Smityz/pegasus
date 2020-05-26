@@ -39,7 +39,6 @@ hotspot_calculator::hotspot_calculator(const std::string &app_name,
                                                   "_hotpartition_threshold",
                                                   3,
                                                   "threshold of hotspot partition value");
-        ddebug("threshold of hotspot partition value %d", _hotpartition_threshold);
         _occurrence_threshold = (uint32_t)dsn_config_get_value_uint64(
             "pegasus.collector",
             "_occurrence_threshold",
@@ -105,29 +104,30 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
     ::dsn::apps::hotkey_detect_request req;
     req.type = is_read_request ? dsn::apps::hotkey_type::READ : dsn::apps::hotkey_type::WRITE;
     req.operation = dsn::apps::hotkey_collector_operation::START;
-    resolver->call_op(RPC_DETECT_HOTKEY,
-                      req,
-                      nullptr,
-                      [app_name, partition_index, is_read_request](
-                          error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
-                          if (err == ERR_OK) {
-                              ::dsn::apps::hotkey_detect_response response;
-                              ::dsn::unmarshall(resp, response);
-                              ddebug("hotkey detect rpc sending successed");
-                              if (response.err == ERR_OK) {
-                                  ddebug("detect hotspot rpc sending succeed");
-                              } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
-                                  ddebug("this hotspot rpc has been sending");
-                              } else if (err == ERR_TIMEOUT) {
-                                  ddebug("this hotspot rpc is time_out");
-                              }
-                          } else {
-                              ddebug("hotkey detect rpc sending failed, %s", err.to_string());
-                          }
-                      },
-                      std::chrono::seconds(10),
-                      partition_index,
-                      0);
+    resolver->call_op(
+        RPC_DETECT_HOTKEY,
+        req,
+        nullptr,
+        [app_name, partition_index, is_read_request](
+            error_code err, dsn::message_ex *request, dsn::message_ex *resp) {
+            if (err == ERR_OK) {
+                ::dsn::apps::hotkey_detect_response response;
+                ::dsn::unmarshall(resp, response);
+                ddebug("hotkey detect rpc sending successed");
+                if (response.err == ERR_OK) {
+                    ddebug("detect hotspot rpc sending succeed");
+                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
+                    ddebug("this hotspot rpc has been sending");
+                } else if (err == ERR_TIMEOUT) {
+                    ddebug("this hotspot rpc is time_out");
+                }
+            } else {
+                ddebug("hotkey detect rpc sending failed, %s", err.to_string());
+            }
+        },
+        std::chrono::seconds(10),
+        partition_index,
+        0);
 }
 
 void hotspot_calculator::start_alg()
