@@ -266,7 +266,7 @@ public:
         ASSERT_EQ(_server->get_write_hotkey_collector()->get_status(), "COARSE");
 
         dsn::blob key;
-        for (int i = 0; i < 300; i++) {
+        for (int i = 1; i < 300; i++) {
             std::string hash_key(hotkey_generator(true));
             dsn::apps::multi_put_request request;
             request.hash_key.assign(hash_key.data(), 0, hash_key.length());
@@ -283,7 +283,7 @@ public:
             dsn::task_ptr t;
             t = dsn::tasking::enqueue(RPC_REPLICATION_WRITE_EMPTY, nullptr, write);
             t->wait();
-            if (i % 60 == 0)
+            if (i % 25 == 0)
                 _server->get_write_hotkey_collector()->analyse_data();
         }
         ASSERT_EQ(_server->get_write_hotkey_collector()->get_status(), "FINISH");
