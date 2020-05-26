@@ -114,7 +114,7 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
                 if (response.err == ERR_OK) {
                     ddebug("hotkey detect rpc sending successed");
                 } else {
-                    ddebug("hotkey detect rpc sending failed, %s", err.to_string());
+                    ddebug("hotkey detect rpc sending failed, %s", response.err.to_string());
                 }
             } else {
                 ddebug("hotkey detect rpc sending failed, %s", err.to_string());
