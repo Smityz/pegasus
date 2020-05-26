@@ -268,8 +268,9 @@ public:
             request.hash_key.assign(hash_key.data(), 0, hash_key.length());
             for (int j = 0; j < 100; j++) {
                 request.kvs.emplace_back();
-                request.kvs.back().key.assign(sort_key[j].data(), 0, sort_key[j].size());
-                request.kvs.back().value.assign(value[j].data(), 0, value[j].size());
+                std::string temp = std::to_string(j);
+                request.kvs.back().key.assign(temp, 0, temp.size());
+                request.kvs.back().value.assign(temp, 0, temp.size());
             }
             auto msg = new dsn::message_ex *[1];
             auto write = [&] { _server->on_batched_write_requests(i, 0, msg, 1); };
