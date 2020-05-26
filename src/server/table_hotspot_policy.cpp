@@ -130,29 +130,35 @@ void hotspot_calculator::start_alg()
     ddebug("start to detect hotspot partition");
     _policy->analysis(_app_data, _points);
     if (_enable_hotkey_auto_detect) {
-        bool reset_read_hotpartition = false;
-        bool reset_write_hotpartition = false;
+        bool find_a_read_hotpartition = false;
+        bool find_a_write_hotpartition = false;
         for (int i = 0; i < _points.size(); i++) {
             if (_points[i].read_hotpartition_counter->get_value() >= _hotpartition_threshold &&
                 ++_over_threshold_times_read[i] > _occurrence_threshold) {
                 notify_replica(this->_app_name, i, true);
-                reset_read_hotpartition = true;
+                find_a_read_hotpartition = true;
             }
             if (_points[i].write_hotpartition_counter->get_value() >= _hotpartition_threshold &&
                 ++_over_threshold_times_write[i] > _occurrence_threshold) {
                 notify_replica(this->_app_name, i, false);
-                reset_write_hotpartition = true;
+                find_a_write_hotpartition = true;
             }
         }
-        if (reset_read_hotpartition) {
+        if (find_a_read_hotpartition) {
             for (int i = 0; i < _points.size(); i++) {
                 _over_threshold_times_read[i] = 0;
             }
+            ddebug("Find a read hot partition");
+        } else {
+            ddebug("Not find a read hot partition");
         }
-        if (reset_write_hotpartition) {
+        if (find_a_write_hotpartition) {
             for (int i = 0; i < _points.size(); i++) {
                 _over_threshold_times_write[i] = 0;
             }
+            ddebug("Find a write hot partition");
+        } else {
+            ddebug("Not find a write hot partition");
         }
     }
 }
