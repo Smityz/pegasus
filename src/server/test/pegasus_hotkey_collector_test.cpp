@@ -182,9 +182,13 @@ public:
             if (i % 25 == 0)
                 _server->get_write_hotkey_collector()->analyse_data();
         }
-        ASSERT_EQ(_server->get_write_hotkey_collector()->get_status(), "COARSE");
+        ASSERT_NE(_server->get_write_hotkey_collector()->get_status(), "FINISH");
         std::string result;
         ASSERT_EQ(_server->get_write_hotkey_collector()->get_result(result), false);
+
+        req.type = dsn::apps::hotkey_type::WRITE;
+        req.operation = dsn::apps::hotkey_collector_operation::STOP;
+        _server->on_detect_hotkey(req, resp);
     }
 
     void write_test_hotkey_data()
