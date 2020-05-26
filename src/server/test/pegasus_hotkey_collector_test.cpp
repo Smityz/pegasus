@@ -266,6 +266,11 @@ public:
             std::string hash_key(hotkey_generator(true));
             dsn::apps::multi_put_request request;
             request.hash_key.assign(hash_key.data(), 0, hash_key.length());
+            for (int j = 0; j < 100; j++) {
+                request.kvs.emplace_back();
+                request.kvs.back().key.assign(sort_key[j].data(), 0, sort_key[j].size());
+                request.kvs.back().value.assign(value[j].data(), 0, value[j].size());
+            }
             auto msg = new dsn::message_ex *[1];
             auto write = [&] { _server->on_batched_write_requests(i, 0, msg, 1); };
             msg[0] = dsn::from_thrift_request_to_received_message(
