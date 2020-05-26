@@ -44,9 +44,7 @@ hotspot_calculator::hotspot_calculator(const std::string &app_name,
             "_occurrence_threshold",
             1,
             "hot paritiotion occurrence times'threshold to send rpc to detect hotkey");
-        ddebug("threshold of send rpc to detect hotkey", _occurrence_threshold);
     }
-    ddebug("hotspot_calculator construct!");
 }
 
 void hotspot_calculator::aggregate(const std::vector<row_data> &partitions)
@@ -113,9 +111,8 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
             if (err == ERR_OK) {
                 ::dsn::apps::hotkey_detect_response response;
                 ::dsn::unmarshall(resp, response);
-                ddebug("hotkey detect rpc sending successed");
                 if (response.err == ERR_OK) {
-                    ddebug("detect hotspot rpc sending succeed");
+                    ddebug("hotkey detect rpc sending successed");
                 } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
                     ddebug("this hotspot rpc has been sending");
                 } else if (err == ERR_TIMEOUT) {
