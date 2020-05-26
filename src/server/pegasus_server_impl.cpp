@@ -1247,9 +1247,11 @@ void pegasus_server_impl::on_detect_hotkey(
     const ::dsn::apps::hotkey_detect_request &args,
     ::dsn::rpc_replier<::dsn::apps::hotkey_detect_response> &reply)
 {
+
     ::dsn::apps::hotkey_detect_response resp;
     resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
     reply(resp);
+    return;
 
     derror_replica("Received hotkey RPC");
     if (args.operation == dsn::apps::hotkey_collector_operation::START) {
