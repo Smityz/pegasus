@@ -270,7 +270,7 @@ public:
             std::string hash_key(hotkey_generator(true));
             dsn::apps::multi_put_request request;
             request.hash_key.assign(hash_key.data(), 0, hash_key.length());
-            for (int j = 0; j < 100; j++) {
+            for (int j = 0; j < 10; j++) {
                 request.kvs.emplace_back();
                 std::string temp = std::to_string(j);
                 request.kvs.back().key.assign(temp.data(), 0, temp.size());
