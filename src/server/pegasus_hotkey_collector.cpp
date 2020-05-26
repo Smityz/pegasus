@@ -117,8 +117,8 @@ void hotkey_collector::capture_msg_data(dsn::message_ex **requests, const int co
                 requests[0]->restore_read();
                 key = thrift_request.hash_key;
                 capture_str_data(key.to_string());
-                if (requests.kvs.size() > 1) {
-                    for (int j = 0; j < kvs.size() - 2; j++) {
+                if (thrift_request.kvs.size() > 1) {
+                    for (int j = 0; j < thrift_request.kvs.size() - 2; j++) {
                         capture_str_data(key.to_string());
                     }
                 }
