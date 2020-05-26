@@ -295,7 +295,7 @@ struct hotkey_detect_request {
 }
 
 struct hotkey_detect_response {
-    1: optional i32 err;
+    1: i32 err;
 }
 
 
