@@ -266,7 +266,7 @@ public:
         ASSERT_EQ(_server->get_write_hotkey_collector()->get_status(), "COARSE");
 
         dsn::blob key;
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 30000; i++) {
             std::string hash_key(hotkey_generator(true));
             dsn::apps::multi_put_request request;
             request.hash_key.assign(hash_key.data(), 0, hash_key.length());
