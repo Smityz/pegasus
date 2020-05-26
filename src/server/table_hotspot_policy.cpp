@@ -36,12 +36,12 @@ hotspot_calculator::hotspot_calculator(const std::string &app_name,
         _over_threshold_times_write.resize(partition_num);
         _hotpartition_threshold =
             (uint32_t)dsn_config_get_value_uint64("pegasus.collector",
-                                                  "_hotpartition_threshold",
+                                                  "hotpartition_threshold",
                                                   3,
                                                   "threshold of hotspot partition value");
         _occurrence_threshold = (uint32_t)dsn_config_get_value_uint64(
             "pegasus.collector",
-            "_occurrence_threshold",
+            "occurrence_threshold",
             1,
             "hot paritiotion occurrence times'threshold to send rpc to detect hotkey");
     }
