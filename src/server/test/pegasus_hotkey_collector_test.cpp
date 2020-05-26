@@ -283,7 +283,7 @@ public:
             dsn::task_ptr t;
             t = dsn::tasking::enqueue(RPC_REPLICATION_WRITE_EMPTY, nullptr, write);
             t->wait();
-            if (i % 25 == 0)
+            if (i % 60 == 0)
                 _server->get_write_hotkey_collector()->analyse_data();
         }
         ASSERT_EQ(_server->get_write_hotkey_collector()->get_status(), "FINISH");
