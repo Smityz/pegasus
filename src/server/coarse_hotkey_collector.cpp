@@ -32,6 +32,10 @@ const int hotkey_coarse_data_collector::analyse_coarse_data()
     for (int i = 0; i < _hotkey_collector_data_fragmentation; i++) {
         data_samples.push_back(_coarse_count[i].load());
     }
+    for (auto iter : data_samples) {
+        std::cout << iter << std::endl;
+    }
+    std::cout << std::endl;
     if (hotkey_collector::variance_cal(data_samples, hot_values, _data_variance_threshold)) {
         int hotkey_num = 0, hotkey_index = 0;
         for (int i = 0; i < _hotkey_collector_data_fragmentation; i++) {
