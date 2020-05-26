@@ -50,13 +50,10 @@ bool hotkey_collector::init()
                "FINE");
         return false;
     case FINISH:
-        clear();
-        _timestamp = dsn_now_s();
-        _coarse_data_collector.reset(new hotkey_coarse_data_collector(this));
-        _collector_state.store(COARSE);
-        ddebug("Is starting to detect %s hotkey",
-               hotkey_type == dsn::apps::hotkey_type::READ ? "read" : "write");
-        return true;
+        ddebug(
+            "%s hotkey result has been found, you can send a stop rpc to restart hotkey detection",
+            hotkey_type == dsn::apps::hotkey_type::READ ? "Read" : "Write");
+        return false;
     case STOP:
         _timestamp = dsn_now_s();
         _coarse_data_collector.reset(new hotkey_coarse_data_collector(this));
