@@ -113,10 +113,8 @@ void hotspot_calculator::init_perf_counter(const int perf_counter_count)
                 ::dsn::unmarshall(resp, response);
                 if (response.err == ERR_OK) {
                     ddebug("hotkey detect rpc sending successed");
-                } else if (response.err == ERR_SERVICE_ALREADY_EXIST) {
-                    ddebug("this hotspot rpc has been sending");
-                } else if (err == ERR_TIMEOUT) {
-                    ddebug("this hotspot rpc is time_out");
+                } else {
+                    ddebug("hotkey detect rpc sending failed, %s", err.to_string());
                 }
             } else {
                 ddebug("hotkey detect rpc sending failed, %s", err.to_string());

@@ -1079,11 +1079,12 @@ void pegasus_server_impl::on_get_scanner(const ::dsn::apps::get_scanner_request 
         // if the context is used, it will be fetched and re-put into cache,
         // which will change the handle,
         // then the delayed task will fetch null context by old handle, and do nothing.
-        ::dsn::tasking::enqueue(LPC_PEGASUS_SERVER_DELAY,
-                                &_tracker,
-                                [this, handle]() { _context_cache.fetch(handle); },
-                                0,
-                                std::chrono::minutes(5));
+        ::dsn::tasking::enqueue(
+            LPC_PEGASUS_SERVER_DELAY,
+            &_tracker,
+            [this, handle]() { _context_cache.fetch(handle); },
+            0,
+            std::chrono::minutes(5));
     } else {
         // scan completed
         resp.context_id = pegasus::SCAN_CONTEXT_ID_COMPLETED;
@@ -1213,11 +1214,12 @@ void pegasus_server_impl::on_scan(const ::dsn::apps::scan_request &request,
             // scan not completed
             int64_t handle = _context_cache.put(std::move(context));
             resp.context_id = handle;
-            ::dsn::tasking::enqueue(LPC_PEGASUS_SERVER_DELAY,
-                                    &_tracker,
-                                    [this, handle]() { _context_cache.fetch(handle); },
-                                    0,
-                                    std::chrono::minutes(5));
+            ::dsn::tasking::enqueue(
+                LPC_PEGASUS_SERVER_DELAY,
+                &_tracker,
+                [this, handle]() { _context_cache.fetch(handle); },
+                0,
+                std::chrono::minutes(5));
         } else {
             // scan completed
             resp.context_id = pegasus::SCAN_CONTEXT_ID_COMPLETED;
@@ -1251,7 +1253,7 @@ void pegasus_server_impl::on_detect_hotkey(
     } else if (args.operation == dsn::apps::hotkey_collector_operation::STOP) {
         on_stop_detect_hotkey(args, reply);
     } else {
-        derror("unkwnon hotkey_collector_operation");
+        derror_replica("unkwnon hotkey_collector_operation");
         ::dsn::apps::hotkey_detect_response resp;
         resp.err = ::dsn::ERR_SERVICE_NOT_FOUND;
         reply(resp);
@@ -1270,7 +1272,7 @@ void pegasus_server_impl::on_start_detect_hotkey(
     } else if (args.type == dsn::apps::hotkey_type::WRITE) {
         hotkey_collector_pointer = _write_hotkey_collector;
     } else {
-        derror("Error hotkey_type");
+        derror_replica("Error hotkey_type");
         resp.err = ::dsn::ERR_SERVICE_NOT_FOUND;
         reply(resp);
         return;
@@ -1279,6 +1281,7 @@ void pegasus_server_impl::on_start_detect_hotkey(
     if (hotkey_collector_pointer->init()) {
         resp.err = ::dsn::ERR_OK;
     } else {
+        derror_replica("Has been detecting hotkey");
         resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
     }
     reply(resp);
@@ -1490,11 +1493,11 @@ void pegasus_server_impl::on_stop_detect_hotkey(
     set_usage_scenario(ROCKSDB_ENV_USAGE_SCENARIO_NORMAL);
 
     dinfo_replica("start the update rocksdb statistics timer task");
-    _update_replica_rdb_stat =
-        ::dsn::tasking::enqueue_timer(LPC_REPLICATION_LONG_COMMON,
-                                      &_tracker,
-                                      [this]() { this->update_replica_rocksdb_statistics(); },
-                                      _update_rdb_stat_interval);
+    _update_replica_rdb_stat = ::dsn::tasking::enqueue_timer(
+        LPC_REPLICATION_LONG_COMMON,
+        &_tracker,
+        [this]() { this->update_replica_rocksdb_statistics(); },
+        _update_rdb_stat_interval);
 
     // Block cache is a singleton on this server shared by all replicas, its metrics update
     // task should be scheduled once an interval on the server view.
@@ -1512,15 +1515,17 @@ void pegasus_server_impl::on_stop_detect_hotkey(
     _cu_calculator = dsn::make_unique<capacity_unit_calculator>(this);
     _server_write = dsn::make_unique<pegasus_server_write>(this, _verbose_log);
 
-    ::dsn::tasking::enqueue_timer(LPC_ANALYZE_HOTKEY,
-                                  &_tracker,
-                                  [this]() { _read_hotkey_collector->analyse_data(); },
-                                  _hotkey_analyse_time_interval);
+    ::dsn::tasking::enqueue_timer(
+        LPC_ANALYZE_HOTKEY,
+        &_tracker,
+        [this]() { _read_hotkey_collector->analyse_data(); },
+        _hotkey_analyse_time_interval);
 
-    ::dsn::tasking::enqueue_timer(LPC_ANALYZE_HOTKEY,
-                                  &_tracker,
-                                  [this]() { _write_hotkey_collector->analyse_data(); },
-                                  _hotkey_analyse_time_interval);
+    ::dsn::tasking::enqueue_timer(
+        LPC_ANALYZE_HOTKEY,
+        &_tracker,
+        [this]() { _write_hotkey_collector->analyse_data(); },
+        _hotkey_analyse_time_interval);
 
     return ::dsn::ERR_OK;
 }
@@ -2593,14 +2598,15 @@ uint64_t pegasus_server_impl::do_manual_compact(const rocksdb::CompactRangeOptio
         // we will try to generate it again, and it will probably succeed because at least some
         // empty data is written into rocksdb by periodic group check.
         ddebug_replica("release storage failed after manual compact, will retry after 5 minutes");
-        ::dsn::tasking::enqueue(LPC_PEGASUS_SERVER_DELAY,
-                                &_tracker,
-                                [this]() {
-                                    ddebug_replica("retry release storage after manual compact");
-                                    release_storage_after_manual_compact();
-                                },
-                                0,
-                                std::chrono::minutes(5));
+        ::dsn::tasking::enqueue(
+            LPC_PEGASUS_SERVER_DELAY,
+            &_tracker,
+            [this]() {
+                ddebug_replica("retry release storage after manual compact");
+                release_storage_after_manual_compact();
+            },
+            0,
+            std::chrono::minutes(5));
     }
 
     // update rocksdb statistics immediately
