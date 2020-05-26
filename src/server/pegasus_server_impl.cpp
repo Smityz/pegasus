@@ -1281,7 +1281,7 @@ void pegasus_server_impl::on_start_detect_hotkey(
     if (hotkey_collector_pointer->init()) {
         resp.err = ::dsn::ERR_OK;
     } else {
-        derror_replica("Has been detecting hotkey");
+        derror_replica("Has been detecting hotkey %d", ::dsn::ERR_SERVICE_ALREADY_EXIST);
         resp.err = ::dsn::ERR_SERVICE_ALREADY_EXIST;
     }
     reply(resp);
