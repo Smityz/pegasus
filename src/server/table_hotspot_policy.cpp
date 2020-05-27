@@ -133,7 +133,6 @@ void hotspot_calculator::start_alg()
         bool find_a_read_hotpartition = false;
         bool find_a_write_hotpartition = false;
         for (int i = 0; i < _points.size(); i++) {
-            std::cout << _points[i].read_hotpartition_counter->get_value() << " ";
             if (_points[i].read_hotpartition_counter->get_value() >= _hotpartition_threshold &&
                 ++_over_threshold_times_read[i] > _occurrence_threshold) {
                 notify_replica(this->_app_name, i, true);
@@ -145,7 +144,6 @@ void hotspot_calculator::start_alg()
                 find_a_write_hotpartition = true;
             }
         }
-        std::cout << std::endl;
         if (find_a_read_hotpartition) {
             for (int i = 0; i < _points.size(); i++) {
                 _over_threshold_times_read[i] = 0;
