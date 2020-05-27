@@ -58,6 +58,7 @@ void hotkey_fine_data_collector::capture_fine_data(const std::string &data)
 
 bool hotkey_fine_data_collector::analyse_fine_data(std::string &result)
 {
+    _fine_count.clear();
     for (int i = 0; i < rw_queues.size(); i++) {
         std::string hash_key;
         // try_emplace and try_dequeue happens at the same time
