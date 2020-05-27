@@ -47,7 +47,6 @@ void hotspot_algo_qps_variance::read_analysis(const partition_data_queue &hotspo
         // perf_counter->set can only be unsigned __int64
         // use ceil to guarantee conversion results
         hot_point = ceil(std::max(hot_point, double(0)));
-        derror("anly_data %d %lf %lf", i, anly_data[i].total_read_qps, hot_point);
         perf_counters[i].read_hotpartition_counter->set(hot_point);
     }
 }

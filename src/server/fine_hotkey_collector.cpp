@@ -91,6 +91,9 @@ bool hotkey_fine_data_collector::analyse_fine_data(std::string &result)
         return true;
     }
     derror("analyse_fine_data failed");
+    for (int i = 0; i < data_samples.size(); i++) {
+        derror("fine data samples %d ", data_samples[i]);
+    }
     return false;
 }
 
