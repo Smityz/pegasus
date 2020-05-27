@@ -86,14 +86,15 @@ bool hotkey_fine_data_collector::analyse_fine_data(std::string &result)
             count_max_key = iter.first;
         }
     }
+    if (data_samples.size() > 0 && data_samples.size() < 3) {
+        result = count_max_key;
+        return true;
+    }
     if (hotkey_collector::variance_cal(data_samples, hot_values, _data_variance_threshold)) {
         result = count_max_key;
         return true;
     }
     derror("analyse_fine_data failed");
-    for (int i = 0; i < data_samples.size(); i++) {
-        derror("fine data samples %d ", data_samples[i]);
-    }
     return false;
 }
 
