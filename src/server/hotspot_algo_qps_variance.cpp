@@ -44,7 +44,8 @@ void hotspot_algo_qps_variance::read_analysis(const partition_data_queue &hotspo
     const auto &anly_data = hotspot_app_data.back();
     for (int i = 0; i < perf_counters.size(); i++) {
         double hot_point = (anly_data[i].total_read_qps - avg) / sd;
-        std::cout << anly_data[i].total_read_qps << std::endl;
+        std::cout << "anly_data[i].total_read_qps " << i << " " << anly_data[i].total_read_qps
+                  << std::endl;
         // perf_counter->set can only be unsigned __int64
         // use ceil to guarantee conversion results
         hot_point = ceil(std::max(hot_point, double(0)));
