@@ -51,6 +51,7 @@ inline int hotkey_fine_data_collector::get_queue_index()
 
 void hotkey_fine_data_collector::capture_fine_data(const std::string &data)
 {
+    std::cout << data << std::endl;
     if (_hotbucket_hash(data, _hotkey_collector_data_fragmentation) != _target_bucket)
         return;
     rw_queues[get_queue_index()].try_emplace(data);
